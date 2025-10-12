@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agendamento de Laboratórios</title>
+  <style>
+    :root{
+      --card-bg: #ffffff;
+      --page-bg: #f4f7fb;
+      --primary: #2563eb;
+      --muted: #9aa4b2;
+      --danger: #ef4444;
+      --radius: 10px;
+      --interdited: #f0f9ff;
+      --interdited-border: #bae6fd;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg,var(--page-bg), #ffffff);
+      color:#1f2937; display:flex; flex-direction:column; align-items:center; padding:28px;
+    }
+
+    h1{ margin:0; font-size:1.6rem; letter-spacing:0.2px }
+    .subtitle{ margin:8px 0 20px; color:var(--muted) }
+
+    .lab-container{
+      width:100%; max-width:1100px;
+      display:grid;
+      gap:18px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      margin-bottom:20px;
+      align-items: start;
+    }
+
+    .lab-card{
+      background:var(--card-bg);
+      padding:18px;
+      border-radius:var(--radius);
+      box-shadow: 0 6px 18px rgba(36,59,85,0.06);
+      transition:transform .18s ease;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-self: start;
+      min-height: 0;
+      position: relative;
+    }
+    .lab-card:hover{ transform:translateY(-4px) }
+    .lab-card.interdited {
+      background: var(--interdited);
+      border: 2px solid var(--interdited-border);
+      opacity: 0.98;
+      cursor: not-allowed;
+    }
+    .lab-title{
+      font-weight:600;
+      margin-bottom:8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .interdict-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .lab-card:hover .interdict-btn {
+      opacity: 1;
+    }
+    .lab-card.interdited .interdict-btn {
+      opacity: 1;
+      background: #10b981;
+    }
+    label.turno-label{ display:block; margin-top:8px; font-size:0.93rem; color:#374151 }
+    select.turno{
+      margin-top:8px; width:92%; padding:9px 10px; border-radius:8px; border:1px solid #e2e8f0;
+      font-size:0.95rem;
+    }
+
+    /* day grid */
+    .day-grid{
+      display:flex; gap:8px; justify-content:center; margin:10px 0 4px; flex-wrap:wrap;
+    }
+    .day-btn{
+      padding:8px 10px; border-radius:8px; border:1px solid #e6eefc; background:#ffffff;
+      cursor:pointer; font-size:0.86rem; min-width:84px;
+      box-shadow: 0 4px 10px rgba(9,30,66,0.03);
+    }
+    .day-btn.disabled{
+      opacity:0.55; pointer-events:none; filter:grayscale(.05);
+    }
+    .day-btn.selected{
+      background: linear-gradient(90deg,#e6f0ff,#d9f7ff);
+      border-color: rgba(37,99,235,0.18);
+      box-shadow: 0 8px 22px rgba(37,99,235,0.06);
+      transform: translateY(-2px);
+    }
+    .day-label{ display:block; font-weight:600; text-transform:capitalize; }
+    .day-sub{ display:block; color:var(--muted); font-size:0.8rem; margin-top:2px; }
+
+    /* horários */
+    .horarios{
+      margin-top:12px; text-align:left;
+      border-radius:8px; background:#f8fafc;
+      overflow:hidden;
+      max-height:0;
+      padding:0 10px;
+      opacity:0;
+      transition: max-height .32s cubic-bezier(.2,.9,.2,1), padding .28s ease, opacity .18s ease;
+      min-height: 0;
+    }
+    .horarios.open{
+      max-height:420px;
+      padding:10px;
+      opacity:1;
+    }
+    .horarios .item-label{
+      display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:6px;
+      cursor:pointer; user-select:none; transition: background .18s ease, padding .18s ease, transform .18s ease, box-shadow .18s ease;
+      color:#111827; font-size:0.95rem; background: transparent;
+    }
+    .horarios .item-label:hover{ background: rgba(37,99,235,0.04) }
+    .horarios .item-label.selected{
+      padding:10px 12px;
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 10px 24px rgba(37,99,235,0.06);
+      background: rgba(37,99,235,0.06);
+    }
+    .horarios input[type="checkbox"]{ transform:scale(1.05); transition: transform .18s ease; }
+    .horarios input[type="checkbox"]:checked{ transform:scale(1.2); }
+    .horarios .disabled{ color:#9ca3af; opacity:0.7; pointer-events:none; }
+    .horarios input[type="checkbox"]:disabled{ cursor:not-allowed; }
+
+    .btn{
+      display:block; width:100%; margin-top:12px; padding:10px 12px;
+      background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;
+      font-weight:600; letter-spacing:0.2px;
+      margin-top: auto;
+    }
+    .btn:active{ transform:translateY(1px) }
+    .btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-row{ width:100%; max-width:1100px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:12px; }
+    .remaining{ color:#0f172a; font-weight:600 }
+    .note{ color:var(--muted); font-size:0.95rem }
+
+    .agenda-list{ width:100%; max-width:1100px; margin-top:18px; background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 18px rgba(36,59,85,0.04) }
+    table{ width:100%; border-collapse:collapse; font-size:0.95rem }
+    th, td{ text-align:left; padding:10px 8px; border-bottom:1px solid #f1f5f9 }
+    th{ color:#374151; font-weight:600 }
+    .small-btn{ background:#efefef; border:none; padding:6px 8px; border-radius:8px; cursor:pointer }
+    .small-btn.del{ background:var(--danger); color:white }
+
+    .reset-box{ width:100%; max-width:1100px; margin-top:18px; background:#0b1220; color:#fff; border-radius:12px; padding:18px; box-shadow: 0 10px 30px rgba(2,6,23,0.25); display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+    .reset-box .title{ font-size:1.05rem; font-weight:700; color:#e6eefc; }
+    .reset-box .message{ color:#c6d5f8; font-size:0.96rem; }
+    .reset-box .countdown{ margin-top:6px; font-size:1.75rem; font-weight:800; letter-spacing:1px; background: linear-gradient(90deg,#1136b1,#0ea5a3); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .reset-box .sub{ color:#9fb0df; font-size:0.88rem }
+    .reset-box.hidden{ display:none !important; }
+
+    /* status badge */
+    .badge{
+      display:inline-block; padding:4px 8px; border-radius:999px; background:#10b981; color:white; font-weight:700; font-size:0.8rem; margin-left:8px;
+    }
+
+    /* Interdiction modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 12% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 560px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
+    .modal-body {
+      margin-bottom: 20px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-modal {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .btn-confirm {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-remove {
+      background: var(--danger);
+      color: white;
+    }
+    textarea, input[type="datetime-local"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .interdiction-info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 10px;
+      text-align: left;
+    }
+    .interdiction-info p {
+      margin: 0 0 8px 0;
+    }
+    .interdiction-info strong {
+      color: var(--primary);
+    }
+
+    @media (max-width: 480px) {
+      .lab-container { grid-template-columns: repeat(2, calc((100% - 18px) / 2)); }
+      .lab-card { padding: 14px 8px; }
+      .lab-title { font-size: 0.9rem; }
+      select.turno { width: 90%; padding: 8px; font-size: 0.9rem; }
+      .reset-box .countdown{ font-size:1.25rem; }
+      .day-grid{ gap:6px; }
+      .day-btn{ min-width:72px; padding:7px 8px; font-size:0.82rem; }
+      .modal-content {
+        margin: 20% auto;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Agendamento de Laboratórios</h1>
+  <div class="subtitle">Cada agendamento pode conter até <strong>2 horários</strong>. Limite: <strong>4 agendamentos por semana</strong>.</div>
+
+  <div class="status-row">
+    <div class="remaining" id="restantes">Agendamentos restantes: —</div>
+    <div class="note">Horários da manhã começam em <strong>07:00</strong>, cada bloco com 45 minutos.</div>
+  </div>
+
+  <div id="labs" class="lab-container"></div>
+
+  <div class="agenda-list" id="agendaList" aria-live="polite"></div>
+
+  <div id="resetBox" class="reset-box hidden" role="status" aria-live="polite">
+    <div class="title" id="resetTitle">Fim do fim de semana — reabertura às 18:00 de domingo</div>
+    <div class="message" id="resetMessage">O contador mostra o tempo restante até domingo às <strong>18:00</strong>.</div>
+    <div class="countdown" id="resetCountdown">--:--:--</div>
+    <div class="sub" id="resetSub">Tempo restante até o fim do fim de semana</div>
+  </div>
+
+  <!-- Modal for interdiction -->
+  <div id="interdictionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Interromper uso do laboratório</div>
+        <span class="close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p id="modalPrompt">Informe o motivo da interdição do laboratório:</p>
+        <textarea id="interdictionReason" placeholder="Descreva o motivo da interdição..."></textarea>
+        <p style="margin-top:8px;margin-bottom:6px;font-size:0.95rem;color:#475569;">Data fim (opcional) — se preenchida, interdição expira nessa data/hora</p>
+        <input id="interdictionEnd" type="datetime-local" />
+        <div id="interdictionInfo" class="interdiction-info" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancel" id="cancelInterdiction">Cancelar</button>
+        <button class="btn-modal btn-confirm" id="confirmInterdiction">Confirmar Interdição</button>
+        <button class="btn-modal btn-remove" id="removeInterdiction" style="display: none;">Remover Interdição</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://zszcwubydhgoyhxbxfro.supabase.co"; // já no seu código
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function generateAgendamentoId() { return 'agendamento_' + Date.now() + '_' + Math.random().toString(36).substr(2,5); }
+
+    const LABS = ["Lab 1", "Lab 2", "Lab 3", "Lab 4", "Lab Raul"];
+    const HORARIOS_MANHA = [
+      "1º horário (07:00 - 07:45)",
+      "2º horário (07:45 - 08:30)",
+      "3º horário (08:30 - 09:15)",
+      "4º horário (09:15 - 10:00)",
+      "5º horário (10:00 - 10:45)",
+      "6º horário (10:45 - 11:30)"
+    ];
+    const HORARIOS_TARDE = [
+      "1º horário (13:00 - 13:45)",
+      "2º horário (13:45 - 14:30)",
+      "3º horário (14:30 - 15:15)",
+      "4º horário (15:15 - 16:00)",
+      "5º horário (16:00 - 16:45)",
+      "6º horário (16:45 - 17:30)"
+    ];
+
+    const STORAGE_KEY = "agendamentos_v3";
+    const NOTIFIED_KEY = "agendamentos_notificados_v3";
+
+    function slugify(text){ return text.toString().toLowerCase().replace(/\s+/g,'-').replace(/[^\w-]+/g,'').replace(/--+/g,'-'); }
+    function getWeekNumber(date){ const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())); const dayNum = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() + 4 - dayNum); const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil(((d - yearStart)/86400000 + 1)/7); }
+
+    const hoje = new Date();
+    const semanaAtual = `${hoje.getFullYear()}-W${getWeekNumber(hoje)}`;
+
+    function loadData(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) {
+          const init = { semana: semanaAtual, quantidade: 0, registros: [] };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(init));
+          return init;
+        }
+        const obj = JSON.parse(raw);
+        if (!obj.semana || obj.semana !== semanaAtual){
+          const init = { semana: semanaAtual, quantidade: 0, registros: [] };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(init));
+          return init;
+        }
+        return obj;
+      }catch(e){
+        const init = { semana: semanaAtual, quantidade: 0, registros: [] };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(init));
+        return init;
+      }
+    }
+    function saveData(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+    function loadNotified(){ try{ return JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {}; }catch{return {}} }
+    function saveNotified(obj){ localStorage.setItem(NOTIFIED_KEY, JSON.stringify(obj)); }
+
+    let dados = loadData();
+
+    function getLocalUser(){ try{ return JSON.parse(localStorage.getItem('userData')) || null; } catch { return null; } }
+    let userClasse = null;
+    let userEmail = null;
+
+    function getWeekDays(includeWeekend = false){
+      const today = new Date();
+      const day = today.getDay();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+      monday.setHours(0,0,0,0);
+      const days = [];
+      const count = includeWeekend ? 7 : 5;
+      for(let i=0;i<count;i++){
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        days.push(d);
+      }
+      return days;
+    }
+    function formatDayLong(d){ return d.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'2-digit' }); }
+    function isSameDay(a,b){ if(!a||!b) return false; return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+    function parseRangeFromLabel(label){ const m = label.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/); if(!m) return null; return { start: m[1], end: m[2] }; }
+    function horarioPassou(label, diaEscolhido){ if(!diaEscolhido) return false; const agora = new Date(); if(!isSameDay(agora, diaEscolhido)) return false; const range = parseRangeFromLabel(label); if(!range) return false; const [sh, sm] = range.start.split(':').map(Number); const [eh, em] = range.end.split(':').map(Number); const inicio = new Date(diaEscolhido); inicio.setHours(sh, sm, 0, 0); const fim = new Date(diaEscolhido); fim.setHours(eh, em, 0, 0); return fim <= agora; }
+
+    function getWeekRangeFor(date = new Date()){
+      const d = new Date(date);
+      const day = d.getDay();
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+      monday.setHours(0,0,0,0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23,59,59,999);
+      return { start: monday.toISOString(), end: sunday.toISOString() };
+    }
+
+    // Supabase: agendamentos table functions (mantidas iguais)
+    async function fetchUserClasseFromDb(email){
+      if(!email) return null;
+      try{
+        const { data, error } = await supabase
+          .from('dadoscetep')
+          .select('classe')
+          .eq('email', email)
+          .maybeSingle();
+        if(error) return null;
+        return data?.classe || null;
+      }catch(e){
+        return null;
+      }
+    }
+    async function countWeeklyAgendasFor(email, date){
+      if(!email) return 0;
+      const { start, end } = getWeekRangeFor(date);
+      try{
+        const { count, error } = await supabase
+          .from('agendamentos')
+          .select('*', { count: 'exact' })
+          .eq('user_email', email)
+          .gte('dia', start)
+          .lte('dia', end);
+        if(error) return 0;
+        return count || 0;
+      }catch(e){
+        return 0;
+      }
+    }
+    async function insertAgendamentoToDb(payload){
+      try{
+        const agendamentoId = generateAgendamentoId();
+        const { data, error } = await supabase
+          .from('agendamentos')
+          .insert([{
+            id: agendamentoId,
+            user_email: payload.email,
+            lab_nome: payload.lab_nome,
+            dia: payload.dia,
+            turno: payload.turno,
+            horario: payload.horario
+          }])
+          .select('id')
+          .maybeSingle();
+        if(error){
+          console.error('Erro ao inserir agendamento:', error);
+          return { error };
+        }
+        return { data };
+      }catch(e){
+        console.error('Exceção ao inserir agendamento:', e);
+        return { error: e };
+      }
+    }
+    async function deleteAgendamentoFromDb(dbId){
+      if(!dbId) return { error: 'ID ausente' };
+      try{
+        const { error } = await supabase
+          .from('agendamentos')
+          .delete()
+          .eq('id', dbId);
+        return { error };
+      }catch(e){
+        return { error: e };
+      }
+    }
+
+    // ====== NOVO: FUNÇÕES PARA SALVAR/REMOVER/OBTER 'parado' ======
+    // tabela 'parado' com colunas: user_email, lab_nome, motivo, data_fim
+    async function fetchParadoActive() {
+      // busca tudo e filtra no cliente (robusto e simples)
+      try {
+        const { data, error } = await supabase
+          .from('parado')
+          .select('*');
+        if (error) {
+          console.error('Erro ao buscar tabela parado:', error);
+          return {};
+        }
+        const now = new Date();
+        const map = {};
+        (data || []).forEach(row => {
+          // row.data_fim pode ser null ou uma string ISO
+          const df = row.data_fim ? new Date(row.data_fim) : null;
+          if (!df || df > now) {
+            // interdição vigente
+            map[row.lab_nome] = {
+              user_email: row.user_email || null,
+              motivo: row.motivo || '',
+              data_fim: row.data_fim || null,
+              raw: row
+            };
+          }
+        });
+        return map;
+      } catch (e) {
+        console.error('Exceção em fetchParadoActive:', e);
+        return {};
+      }
+    }
+
+    async function createParado(labName, motivo, dataFimISO) {
+      // dataFimISO pode ser null
+      try {
+        const payload = {
+          user_email: userEmail || null,
+          lab_nome: labName,
+          motivo: motivo || null,
+          data_fim: dataFimISO || null
+        };
+        const { data, error } = await supabase
+          .from('parado')
+          .insert([payload])
+          .select();
+        if (error) {
+          console.error('Erro ao inserir em parado:', error);
+          return { error };
+        }
+        return { data };
+      } catch (e) {
+        console.error('Exceção createParado:', e);
+        return { error: e };
+      }
+    }
+
+    async function deleteParadoByLab(labName) {
+      try {
+        const { error } = await supabase
+          .from('parado')
+          .delete()
+          .eq('lab_nome', labName);
+        if (error) {
+          console.error('Erro ao deletar interdição em parado:', error);
+          return { error };
+        }
+        return { success: true };
+      } catch (e) {
+        console.error('Exceção deleteParadoByLab:', e);
+        return { error: e };
+      }
+    }
+
+    // ====== RESTO DO CÓDIGO (UI) ajustado para usar fetchParadoActive/createParado/deleteParadoByLab ======
+    const labsContainer = document.getElementById("labs");
+    const restantesEl = document.getElementById("restantes");
+    const agendaListEl = document.getElementById("agendaList");
+    const modal = document.getElementById("interdictionModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const interdictionReason = document.getElementById("interdictionReason");
+    const interdictionInfo = document.getElementById("interdictionInfo");
+    const cancelInterdiction = document.getElementById("cancelInterdiction");
+    const confirmInterdiction = document.getElementById("confirmInterdiction");
+    const removeInterdiction = document.getElementById("removeInterdiction");
+    const closeBtn = document.querySelector(".close");
+    const interdictionEnd = document.getElementById("interdictionEnd");
+    const modalPrompt = document.getElementById("modalPrompt");
+
+    let currentLabForInterdiction = null;
+    let interdictions = {}; // interdictions current map from fetchParadoActive
+
+    async function buildCards(){
+      interdictions = await fetchParadoActive();
+
+      labsContainer.innerHTML = "";
+      const includeWeekend = (userClasse === 'Direção');
+      const dias = getWeekDays(includeWeekend);
+      LABS.forEach(labName => {
+        const id = slugify(labName);
+        const card = document.createElement("div");
+        card.className = "lab-card";
+        card.id = `card-${id}`;
+
+        const isInterdicted = !!interdictions[labName];
+        if (isInterdicted) card.classList.add("interdited");
+
+        const dayButtonsHtml = dias.map((d, idx) => {
+          return `<button type="button" class="day-btn" data-date="${d.toISOString()}" data-idx="${idx}"><span class="day-label">${d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.', '')}</span><span class="day-sub">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</span></button>`;
+        }).join("");
+
+        card.innerHTML = `
+          <div class="lab-title">
+            <span>${labName}</span>
+            ${userClasse === 'Direção' ? `<button class="interdict-btn">${isInterdicted ? 'Remover Interdição' : 'Interromper uso'}</button>` : ''}
+          </div>
+          ${isInterdicted ? `
+            <div class="interdiction-info">
+              <p><strong>Laboratório interditado pela Direção</strong></p>
+              <p>${interdictions[labName].motivo || "Motivo não informado"}</p>
+              <p>Expira em: ${interdictions[labName].data_fim ? new Date(interdictions[labName].data_fim).toLocaleString('pt-BR') : 'Indefinido'}</p>
+            </div>
+          ` : ''}
+          <div class="day-grid" id="days-${id}" aria-hidden="false">${dayButtonsHtml}</div>
+          <label class="turno-label" for="turno-${id}">Turno</label>
+          <select id="turno-${id}" class="turno" data-lab="${id}" ${isInterdicted ? 'disabled' : ''}>
+            <option value="">-- selecione --</option>
+            <option value="Manhã">Manhã</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noite">Noite</option>
+          </select>
+          <div id="horarios-${id}" class="horarios" aria-live="polite"></div>
+          <button class="btn" data-lab="${id}" ${isInterdicted ? 'disabled' : ''}>Agendar</button>
+        `;
+        labsContainer.appendChild(card);
+
+        // interdiction button event (Direção)
+        if (userClasse === 'Direção') {
+          const interdictBtn = card.querySelector('.interdict-btn');
+          interdictBtn.addEventListener('click', () => {
+            currentLabForInterdiction = labName;
+            if (isInterdicted) {
+              // show remove modal view
+              modalTitle.textContent = `Remover interdição do ${labName}`;
+              interdictionReason.style.display = 'none';
+              interdictionEnd.style.display = 'none';
+              interdictionInfo.style.display = 'block';
+              interdictionInfo.innerHTML = `
+                <p><strong>Motivo da interdição:</strong></p>
+                <p>${interdictions[labName].motivo || "Motivo não informado"}</p>
+                <p><strong>Expira em:</strong> ${interdictions[labName].data_fim ? new Date(interdictions[labName].data_fim).toLocaleString('pt-BR') : 'Indefinido'}</p>
+              `;
+              confirmInterdiction.style.display = 'none';
+              removeInterdiction.style.display = 'inline-block';
+              modalPrompt.style.display = 'none';
+            } else {
+              // show create interdiction view
+              modalTitle.textContent = `Interromper uso do ${labName}`;
+              interdictionReason.style.display = 'block';
+              interdictionEnd.style.display = 'block';
+              interdictionInfo.style.display = 'none';
+              interdictionReason.value = '';
+              interdictionEnd.value = '';
+              confirmInterdiction.style.display = 'inline-block';
+              removeInterdiction.style.display = 'none';
+              modalPrompt.style.display = 'block';
+            }
+            modal.style.display = 'block';
+          });
+        }
+
+        // day / horarios / agendar events only if not interdicted
+        if (!isInterdicted) {
+          const dayGrid = card.querySelector(`#days-${id}`);
+          dayGrid.querySelectorAll('.day-btn').forEach(btn=>{
+            const dateISO = btn.dataset.date;
+            const dateObj = new Date(dateISO);
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            if (dateObj < todayStart) { btn.classList.add('disabled'); btn.setAttribute('aria-disabled','true'); }
+            btn.addEventListener('click', ()=> {
+              dayGrid.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('selected'));
+              btn.classList.add('selected');
+              const selTurno = document.getElementById(`turno-${id}`);
+              if (selTurno && selTurno.value) showHorarios(id, labName);
+              else { const target = document.getElementById(`horarios-${id}`); target.classList.remove('open'); target.innerHTML=''; }
+            });
+          });
+
+          const sel = card.querySelector(`#turno-${id}`);
+          sel.addEventListener("change", ()=> showHorarios(id, labName));
+          const btnAg = card.querySelector(".btn");
+          btnAg.addEventListener("click", ()=> confirmarAgendamento(id, labName));
+        }
+      });
+    }
+
+    function populateHorariosFragment(turno, diaEscolhido, id){
+      const frag = document.createDocumentFragment();
+      if(turno === "Manhã"){
+        let anyEnabled = false;
+        HORARIOS_MANHA.forEach((h, idx) => {
+          const checkboxId = `chk-m-${id}-${idx}-${Math.random().toString(36).slice(2,7)}`;
+          const label = document.createElement("label");
+          label.className = "item-label";
+          label.htmlFor = checkboxId;
+          label.innerHTML = `<input type="checkbox" id="${checkboxId}" value="${h}"> ${h}`;
+          const cb = label.querySelector("input[type=checkbox]");
+          if (horarioPassou(h, diaEscolhido)){ cb.disabled = true; label.classList.add("disabled"); cb.title = "Esse horário já passou hoje"; }
+          else { anyEnabled = true; cb.addEventListener("change", ()=> { label.classList.toggle("selected", cb.checked); const containerId = label.closest(".horarios").id.replace("horarios-",""); limitarSelecao(containerId); }); }
+          frag.appendChild(label);
+        });
+        if (!anyEnabled){ const p = document.createElement("div"); p.style.padding="8px 6px"; p.style.color="#ef4444"; p.style.fontWeight="600"; p.textContent="Todos os horários da manhã já passaram hoje."; frag.appendChild(p); }
+      } else if(turno === "Tarde"){
+        let anyEnabled = false;
+        HORARIOS_TARDE.forEach((h, idx) => {
+          const checkboxId = `chk-t-${id}-${idx}-${Math.random().toString(36).slice(2,7)}`;
+          const label = document.createElement("label");
+          label.className = "item-label";
+          label.htmlFor = checkboxId;
+          label.innerHTML = `<input type="checkbox" id="${checkboxId}" value="${h}"> ${h}`;
+          const cb = label.querySelector("input[type=checkbox]");
+          if (horarioPassou(h, diaEscolhido)){ cb.disabled = true; label.classList.add("disabled"); cb.title = "Esse horário já passou hoje"; }
+          else { anyEnabled = true; cb.addEventListener("change", ()=> { label.classList.toggle("selected", cb.checked); const containerId = label.closest(".horarios").id.replace("horarios-",""); limitarSelecao(containerId); }); }
+          frag.appendChild(label);
+        });
+        if (!anyEnabled){ const p = document.createElement("div"); p.style.padding="8px 6px"; p.style.color="#ef4444"; p.style.fontWeight="600"; p.textContent="Todos os horários da tarde já passaram hoje."; frag.appendChild(p); }
+      } else if(turno === "Noite"){
+        const p = document.createElement("div");
+        p.style.padding = "8px 6px";
+        p.style.color = "#374151";
+        p.textContent = "Sem horários específicos definidos para este turno (opcional: personalizar).";
+        frag.appendChild(p);
+      }
+      return frag;
+    }
+
+    function showHorarios(id, labName){
+      const turnoEl = document.getElementById(`turno-${id}`);
+      if(!turnoEl) return;
+      const turno = turnoEl.value;
+      const target = document.getElementById(`horarios-${id}`);
+      const dayGrid = document.getElementById(`days-${id}`);
+      const selectedDayBtn = dayGrid ? dayGrid.querySelector('.day-btn.selected') : null;
+      if(!turno || !selectedDayBtn){ document.querySelectorAll('.horarios.open').forEach(hEl => { if (hEl !== target) hEl.classList.remove('open'); }); target.classList.remove('open'); target.innerHTML = ''; return; }
+
+      document.querySelectorAll('.horarios.open').forEach(hEl => { if (hEl !== target) hEl.classList.remove('open'); });
+
+      const diaEscolhido = new Date(selectedDayBtn.dataset.date);
+      const openClass = "open";
+      const populate = () => {
+        target.innerHTML = "";
+        const frag = populateHorariosFragment(turno, diaEscolhido, id);
+        target.appendChild(frag);
+        requestAnimationFrame(()=> target.classList.add(openClass));
+        limitarSelecao(id);
+      };
+
+      if (target.classList.contains(openClass)){ target.classList.remove(openClass); setTimeout(populate, 260); } else { populate(); }
+    }
+
+    function limitarSelecao(id){
+      const container = document.getElementById(`horarios-${id}`);
+      if(!container) return;
+      const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+      const checked = checkboxes.filter(c=>c.checked);
+      if(checked.length >= 2){
+        checkboxes.forEach(cb=>{ if(!cb.checked){ cb.disabled = true; const lab = cb.closest("label"); if(lab) lab.classList.add("disabled"); }});
+      }else{
+        checkboxes.forEach(cb=>{
+          const labelText = cb.value || "";
+          const lab = cb.closest("label");
+          if (labelText && horarioPassou(labelText, getSelectedDayForCard(id))) {
+            cb.disabled = true;
+            if(lab) lab.classList.add("disabled");
+            if(lab) lab.classList.remove("selected");
+          } else {
+            cb.disabled = false;
+            if(lab) lab.classList.remove("disabled");
+            if(lab) lab.classList.toggle("selected", cb.checked);
+          }
+        });
+      }
+    }
+
+    function getSelectedDayForCard(id){
+      const dayGrid = document.getElementById(`days-${id}`);
+      if(!dayGrid) return null;
+      const sel = dayGrid.querySelector('.day-btn.selected');
+      return sel ? new Date(sel.dataset.date) : null;
+    }
+
+    async function confirmarAgendamento(id, labName){
+      // re-check interdição no servidor antes de permitir
+      const current = await fetchParadoActive();
+      if (current[labName]) {
+        alert("Este laboratório está interditado pela Direção e não pode ser agendado.");
+        await buildCards();
+        return;
+      }
+
+      const turno = document.getElementById(`turno-${id}`).value;
+      const day = getSelectedDayForCard(id);
+      if(!day){ alert("Selecione um dia antes de agendar."); return; }
+      if(!turno){ alert("Selecione um turno antes de agendar."); return; }
+
+      const container = document.getElementById(`horarios-${id}`);
+      let horariosSelecionados = [];
+      if(container){
+        horariosSelecionados = Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i=>i.value);
+      }
+
+      if((turno === "Manhã" || turno === "Tarde") && horariosSelecionados.length === 0){ alert("Selecione pelo menos um horário para esse turno."); return; }
+      if(horariosSelecionados.length > 2){ alert("Você só pode escolher até 2 horários."); return; }
+
+      if ((turno === "Manhã" || turno === "Tarde") && horariosSelecionados.length){
+        const validos = horariosSelecionados.filter(h => !horarioPassou(h, day));
+        if (validos.length === 0){
+          alert("⚠️ Os horários selecionados já passaram. Escolha horários futuros ou outro dia.");
+          showHorarios(id, labName);
+          return;
+        }
+        horariosSelecionados = validos;
+      }
+
+      const localUser = getLocalUser();
+      userEmail = localUser ? (localUser.email || null) : null;
+      if(userClasse !== 'Direção'){
+        dados = loadData();
+        if(dados.quantidade >= 4){
+          alert("Você já atingiu o limite de 4 agendamentos nesta semana.");
+          return;
+        }
+        if(userEmail){
+          const serverCount = await countWeeklyAgendasFor(userEmail, day);
+          const localCountForWeek = dados.registros.filter(r=>{
+            const rDay = new Date(r.dia);
+            return r.email === userEmail && (new Date(r.dia) >= new Date(getWeekRangeFor(day).start) && new Date(r.dia) <= new Date(getWeekRangeFor(day).end));
+          }).length;
+          const totalCount = serverCount + localCountForWeek;
+          if(totalCount >= 4){
+            alert("Você já atingiu o limite de 4 agendamentos nesta semana (servidor + local).");
+            return;
+          }
+        }
+      }
+
+      dados = loadData();
+      const conflitantes = dados.registros.filter(r=>{
+        if(r.lab !== labName) return false;
+        const rDay = new Date(r.dia);
+        if(!isSameDay(rDay, day)) return false;
+        return r.horarios.some(h => horariosSelecionados.includes(h));
+      });
+      if(conflitantes.length){
+        alert("Já existe um agendamento local para este laboratório no mesmo dia/horário. Escolha outro horário ou dia.");
+        return;
+      }
+
+      const payload = {
+        email: userEmail,
+        lab_nome: labName,
+        horario: horariosSelecionados,
+        dia: day.toISOString(),
+        turno: turno
+      };
+
+      let dbId = null;
+      if(userEmail){
+        const res = await insertAgendamentoToDb(payload);
+        if(res.error){
+          console.warn('Erro ao salvar no servidor — usando fallback local.', res.error);
+          alert('⚠️ Agendamento salvo localmente. Erro no servidor.');
+        } else if(res.data){
+          dbId = res.data.id;
+        }
+      }
+
+      const registro = {
+        id: `${id}-${Date.now()}`,
+        db_id: dbId,
+        lab: labName,
+        turno,
+        horarios: horariosSelecionados,
+        dia: day.toISOString(),
+        email: userEmail
+      };
+      dados.registros.push(registro);
+      dados.quantidade = (dados.quantidade || 0) + 1;
+      saveData(dados);
+
+      checkAgendamentosStatus();
+      alert(`✅ Agendado: ${labName}\nDia: ${formatDayLong(day)}\nTurno: ${turno}\n${horariosSelecionados.length ? "Horários: "+horariosSelecionados.join(", ") : ""}`);
+      renderRemaining();
+      renderAgenda();
+      limparCard(id);
+    }
+
+    function renderRemaining(){
+      dados = loadData();
+      if(userClasse === 'Direção'){
+        restantesEl.textContent = `Agendamentos restantes: ilimitado (Direção)`;
+      } else {
+        const rem = Math.max(0, 4 - (dados.quantidade||0));
+        restantesEl.textContent = `Agendamentos restantes: ${rem}`;
+      }
+    }
+
+    function renderAgenda(){
+      dados = loadData();
+      if(!dados.registros || dados.registros.length === 0){
+        agendaListEl.innerHTML = `<div style="color:#475569; padding:8px">Nenhum agendamento nesta semana.</div>`;
+        return;
+      }
+      let html = `<table aria-label="Agendamentos">
+        <thead><tr><th>Laboratório</th><th>Dia</th><th>Turno</th><th>Horários</th><th>Ações</th></tr></thead><tbody>`;
+      dados.registros.forEach((r, idx)=>{
+        const diaFmt = formatDayLong(new Date(r.dia));
+        const happening = isRegistroHappeningNow(r);
+        html += `<tr>
+          <td>${escapeHtml(r.lab)} ${happening ? '<span class="badge">Acontecendo agora</span>' : ''}</td>
+          <td>${escapeHtml(diaFmt)}</td>
+          <td>${escapeHtml(r.turno)}</td>
+          <td>${escapeHtml((r.horarios && r.horarios.length) ? r.horarios.join(", ") : "-")}</td>
+          <td><button class="small-btn del" data-idx="${idx}">Excluir</button></td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      agendaListEl.innerHTML = html;
+
+      agendaListEl.querySelectorAll("button.del").forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          const idx = Number(btn.dataset.idx);
+          if (!Number.isFinite(idx)) return;
+          if(!confirm("Remover esse agendamento?")) return;
+
+          const registro = dados.registros[idx];
+          if(registro && registro.db_id){
+            const { error } = await deleteAgendamentoFromDb(registro.db_id);
+            if(error){
+              console.warn('Falha ao remover do servidor:', error);
+            }
+          }
+          dados.registros.splice(idx,1);
+          dados.quantidade = Math.max(0, (dados.quantidade||0) - 1);
+          saveData(dados);
+          renderRemaining();
+          renderAgenda();
+        });
+      });
+    }
+
+    function limparCard(id){
+      const sel = document.getElementById(`turno-${id}`);
+      if(sel) sel.value = "";
+      const dayGrid = document.getElementById(`days-${id}`);
+      if(dayGrid) dayGrid.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('selected'));
+      const container = document.getElementById(`horarios-${id}`);
+      if(!container) return;
+      container.classList.remove("open");
+      setTimeout(()=> container.innerHTML = "", 300);
+    }
+
+    function escapeHtml(str){
+      if(!str && str !== 0) return "";
+      return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[s]));
+    }
+
+    function isRegistroHappeningNow(registro){
+      const now = new Date();
+      const day = new Date(registro.dia);
+      for(const label of (registro.horarios||[])){
+        const range = parseRangeFromLabel(label);
+        if(!range) continue;
+        const [sh, sm] = range.start.split(':').map(Number);
+        const [eh, em] = range.end.split(':').map(Number);
+        const inicio = new Date(day); inicio.setHours(sh, sm, 0, 0);
+        const fim = new Date(day); fim.setHours(eh, em, 0, 0);
+        if(now >= inicio && now < fim) return true;
+      }
+      return false;
+    }
+
+    async function checkAgendamentosStatus(){
+      dados = loadData();
+      const now = new Date();
+      const notified = loadNotified();
+      let changed = false;
+      const remaining = [];
+      let removedCount = 0;
+
+      for(const registro of dados.registros){
+        const day = new Date(registro.dia);
+        let anyOngoing = false;
+        let allPast = true;
+
+        for(const label of (registro.horarios||[])){
+          const range = parseRangeFromLabel(label);
+          if(!range) continue;
+          const [sh, sm] = range.start.split(':').map(Number);
+          const [eh, em] = range.end.split(':').map(Number);
+          const inicio = new Date(day); inicio.setHours(sh, sm, 0, 0);
+          const fim = new Date(day); fim.setHours(eh, em, 0, 0);
+
+          if(now < fim) allPast = false;
+          if(now >= inicio && now < fim){
+            anyOngoing = true;
+            const key = `${registro.id}::${label}`;
+            if(!notified[key]){
+              showNotification(`Agendamento: ${registro.lab}`, `${formatDayLong(day)} — ${label}`);
+              notified[key] = true;
+              saveNotified(notified);
+            }
+          }
+        }
+
+        if(allPast){
+          removedCount += 1;
+          changed = true;
+          if(registro.db_id){
+            deleteAgendamentoFromDb(registro.db_id).then(res=>{
+              if(res && res.error) console.warn('Erro ao apagar do servidor após expirar:', res.error);
+            }).catch(e=>console.warn('Erro ao apagar do servidor:', e));
+          }
+        } else {
+          registro._acontecendo = anyOngoing;
+          remaining.push(registro);
+        }
+      }
+
+      if(changed){
+        dados.registros = remaining;
+        dados.quantidade = Math.max(0, (dados.quantidade || 0) - removedCount);
+        saveData(dados);
+        renderRemaining();
+        renderAgenda();
+      } else {
+        renderAgenda();
+      }
+    }
+
+    function showNotification(title, body){
+      if(!('Notification' in window)){
+        alert(`${title}\n${body}`);
+        return;
+      }
+      if(Notification.permission === 'granted'){
+        try{ new Notification(title, { body }); }catch(e){ console.warn('Notificação falhou:', e); }
+      } else if(Notification.permission !== 'denied'){
+        Notification.requestPermission().then(perm => {
+          if(perm === 'granted'){
+            try{ new Notification(title, { body }); }catch(e){ console.warn('Notificação falhou:', e); }
+          }
+        });
+      }
+    }
+
+    // Interdiction UI actions using novo CRUD para tabela 'parado'
+    async function interdictLab(labName, motivo, dataFimISO) {
+      const res = await createParado(labName, motivo, dataFimISO);
+      if (res.error) {
+        alert('Erro ao interditar laboratório. Tente novamente.');
+        return;
+      }
+      await buildCards();
+      modal.style.display = 'none';
+      alert(`Laboratório ${labName} interditado com sucesso!`);
+    }
+
+    async function removeInterdictionForLab(labName) {
+      const res = await deleteParadoByLab(labName);
+      if (res.error) {
+        alert('Erro ao remover interdição. Tente novamente.');
+        return;
+      }
+      await buildCards();
+      modal.style.display = 'none';
+      alert(`Interdição removida do laboratório ${labName}!`);
+    }
+
+    // Modal handlers
+    cancelInterdiction.addEventListener('click', () => { modal.style.display = 'none'; });
+    confirmInterdiction.addEventListener('click', () => {
+      const motivo = interdictionReason.value.trim();
+      const dataFimVal = interdictionEnd.value ? new Date(interdictionEnd.value).toISOString() : null;
+      if (!motivo) { alert("Por favor, informe o motivo da interdição."); return; }
+      interdictLab(currentLabForInterdiction, motivo, dataFimVal);
+    });
+    removeInterdiction.addEventListener('click', () => {
+      if (confirm(`Tem certeza que deseja remover a interdição do laboratório ${currentLabForInterdiction}?`)) {
+        removeInterdictionForLab(currentLabForInterdiction);
+      }
+    });
+    closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    window.addEventListener('click', (event) => { if (event.target === modal) modal.style.display = 'none'; });
+
+    async function init(){
+      const localUser = getLocalUser();
+      userEmail = localUser ? (localUser.email || null) : null;
+      if(userEmail){
+        const fetched = await fetchUserClasseFromDb(userEmail);
+        userClasse = fetched || null;
+      }
+      if(!userClasse && localUser && localUser.classe) userClasse = localUser.classe;
+
+      await buildCards();
+      renderRemaining();
+      renderAgenda();
+
+      if('Notification' in window && Notification.permission === 'default'){ try{ Notification.requestPermission(); }catch(e){} }
+
+      checkAgendamentosStatus();
+      setInterval(checkAgendamentosStatus, 1000);
+
+      // refresh interdições every 30s
+      setInterval(async () => { if (document.visibilityState === 'visible') await buildCards(); }, 30000);
+    }
+
+    // weekend counter (kept)
+    const countdownEl = document.getElementById('resetCountdown');
+    const resetTitleEl = document.getElementById('resetTitle');
+    const resetSubEl = document.getElementById('resetSub');
+    const resetBox = document.getElementById('resetBox');
+
+    function getWeekendWindow(refDate = new Date()){
+      const now = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate(), refDate.getHours(), refDate.getMinutes(), refDate.getSeconds(), refDate.getMilliseconds());
+      const day = now.getDay();
+      const diffToSat = (6 - day + 7) % 7;
+      const saturday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToSat, 0, 0, 0, 0);
+      const sundayEnd = new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate() + 1, 18, 0, 0, 0);
+      return { start: saturday, end: sundayEnd };
+    }
+    function formatTimeLeft(ms){
+      if(ms <= 0) return "00:00:00";
+      const totalSeconds = Math.floor(ms / 1000);
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      return [hrs, mins, secs].map(n => String(n).padStart(2,'0')).join(':');
+    }
+    let countdownTarget = null;
+    function updateWeekendVisibilityAndTarget(){
+      const now = new Date();
+      const { start, end } = getWeekendWindow(now);
+      if (now >= start && now <= end){
+        countdownTarget = end;
+        resetBox.classList.remove('hidden');
+        resetTitleEl.textContent = "Fim do fim de semana — reabertura às 18:00 de domingo";
+        resetSubEl.textContent = "Tempo restante até o fim do fim de semana";
+      } else {
+        countdownTarget = null;
+        resetBox.classList.add('hidden');
+      }
+    }
+    function tickWeekendCountdown(){
+      const now = new Date();
+      if(!countdownTarget){ updateWeekendVisibilityAndTarget(); countdownEl.textContent = "--:--:--"; return; }
+      const diff = countdownTarget - now;
+      if (diff <= 0){
+        resetBox.classList.add('hidden');
+        countdownTarget = null;
+        buildCards();
+        renderRemaining();
+        renderAgenda();
+        countdownEl.textContent = "00:00:00";
+        return;
+      }
+      countdownEl.textContent = formatTimeLeft(diff);
+    }
+
+    init();
+    updateWeekendVisibilityAndTarget();
+    tickWeekendCountdown();
+    setInterval(() => { updateWeekendVisibilityAndTarget(); tickWeekendCountdown(); }, 1000);
+
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ updateWeekendVisibilityAndTarget(); tickWeekendCountdown(); } });
+
+    let lastDateCheck = (new Date()).getDate();
+    setInterval(() => {
+      const now = new Date();
+      const today = now.getDate();
+      if (today !== lastDateCheck){
+        lastDateCheck = today;
+        buildCards();
+        renderRemaining();
+        renderAgenda();
+      } else {
+        document.querySelectorAll('.horarios.open').forEach(hEl => {
+          const id = hEl.id.replace('horarios-','');
+          const sel = document.getElementById(`turno-${id}`);
+          if (sel && (sel.value === "Manhã" || sel.value === "Tarde")) {
+            const turno = sel.value;
+            const selectedDay = getSelectedDayForCard(id);
+            const frag = populateHorariosFragment(turno, selectedDay, id);
+            hEl.innerHTML = "";
+            hEl.appendChild(frag);
+            requestAnimationFrame(()=> hEl.classList.add('open'));
+            limitarSelecao(id);
+          }
+        });
+      }
+    }, 60 * 1000);
+
+    window.addEventListener("focus", async ()=>{ 
+      dados = loadData(); 
+      renderRemaining(); 
+      renderAgenda(); 
+      await buildCards();
+    });
+
+  </script>
+</body>
+</html>

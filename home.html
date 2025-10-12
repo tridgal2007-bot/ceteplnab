@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página Inicial</title>
+
+  <!-- Fonte Jersey 15 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Jersey 15', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      box-sizing: border-box;
+      background: linear-gradient(135deg, #0a0133, #02213d, #11014b);
+      color: white;
+      overflow: auto;
+    }
+
+    .question-box {
+      text-align: center;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      width: min(90%, 420px);
+      max-width: 420px;
+      color: #f0f0f0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+      background-color: rgba(8,10,30,0.35);
+      margin: 0 auto;
+      box-sizing: border-box;
+      backdrop-filter: blur(4px);
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: white;
+      font-size: 1.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    select, input[type="text"], button {
+      padding: 10px;
+      margin-top: 12px;
+      width: 85%;
+      border-radius: 8px;
+      border: 2px solid #3272c5;
+      font-size: 1.1rem;
+      font-family: 'Jersey 15', Arial, sans-serif;
+      outline: none;
+      background: rgba(10, 10, 30, 0.65);
+      color: #f0f0f0;
+      backdrop-filter: blur(2px);
+      transition: border-color 0.3s, background-color 0.3s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: #3f4fb3;
+      background: rgba(15, 15, 40, 0.75);
+    }
+
+    button {
+      background: linear-gradient(135deg, #1c4294, #4c53af);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    #msg {
+      color: #ff9999;
+      margin-top: 10px;
+      font-size: 1rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      transition: opacity 0.6s ease;
+      opacity: 1;
+      min-height: 20px;
+    }
+
+    #msg.fade-out { opacity: 0; }
+
+    #msg.success { color: #b8f0c6; }
+    #msg.info { color: #bfe0ff; }
+
+    .small-note {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #cfdcff;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 20px; }
+      .question-box {
+        padding: 1.1rem;
+        width: calc(100% - 40px);
+        max-width: 360px;
+        border-radius: 12px;
+      }
+      h2 { font-size: 1.4rem; }
+      select, input[type="text"], button {
+        padding: 8px;
+        width: 82%;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="question-box" id="questionBox">
+    <h2>Carregando...</h2>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // === CONFIG (já estava no seu código) ===
+    const supabaseUrl = "https://zszcwubydhgoyhxbxfro.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // decode JWT simples
+    function parseJwt(token) {
+      try {
+        if (!token || typeof token !== 'string') return null;
+        const parts = token.split('.');
+        if (parts.length < 2) return null;
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+          '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        ).join(''));
+        return JSON.parse(jsonPayload);
+      } catch { return null; }
+    }
+
+    const questionBox = document.getElementById('questionBox');
+
+    function setQuestionContent(html, cb) {
+      questionBox.style.animation = 'none';
+      setTimeout(() => {
+        questionBox.innerHTML = html;
+        questionBox.style.opacity = '0';
+        questionBox.style.transform = 'translateY(20px)';
+        void questionBox.offsetHeight;
+        questionBox.style.animation = 'fadeInUp 0.6s ease forwards';
+        if (typeof cb === 'function') cb();
+      }, 10);
+    }
+
+    // mensagem UI
+    function showMsg(text, kind = 'info', timeout = 4000) {
+      const msg = document.getElementById('msg');
+      if(!msg) return;
+      msg.textContent = text;
+      msg.classList.remove('fade-out','success','info');
+      msg.classList.add(kind);
+      if (timeout > 0) {
+        setTimeout(()=>msg.classList.add('fade-out'), timeout - 300);
+        setTimeout(()=>{ msg.textContent=''; msg.classList.remove('fade-out', kind); }, timeout);
+      }
+    }
+
+    let googleUser = null;
+    let savedUser = null;
+    let userData = { classe: '' };
+
+    function init() {
+      try {
+        savedUser = JSON.parse(localStorage.getItem('userData')) || null;
+      } catch { savedUser = null; }
+
+      const rawToken = localStorage.getItem('googleToken');
+      if (rawToken) googleUser = parseJwt(rawToken);
+
+      if (!googleUser && !savedUser) {
+        alert('Você precisa fazer login primeiro!');
+        localStorage.removeItem('googleToken');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // preenche userData com o que já existe
+      if (savedUser) userData = { ...userData, ...savedUser };
+
+      askClasse();
+    }
+
+    function askClasse() {
+      setQuestionContent(`
+        <h2>Selecione sua função</h2>
+        <select id="classeSelect" aria-label="Selecione sua função">
+          <option value="">Selecione...</option>
+          <option value="Professor">Professor</option>
+          <option value="Direção">Direção</option>
+        </select>
+        <div id="direcaoBlock" style="display:none">
+          <input type="text" id="direcaoCode" placeholder="Digite o código de confirmação" aria-label="Código de confirmação para Direção" />
+          <div class="small-note">Somente quem possui o código de Direção pode prosseguir.</div>
+        </div>
+        <br>
+        <button id="confirmClasseBtn">Confirmar</button>
+        <p id="msg"></p>
+      `, () => {
+        const select = document.getElementById('classeSelect');
+        const direcaoBlock = document.getElementById('direcaoBlock');
+        const direcaoInput = document.getElementById('direcaoCode');
+
+        if (userData.classe) select.value = userData.classe;
+
+        // mostrar / esconder campo de código quando Direção é escolhida
+        select.addEventListener('change', () => {
+          if (select.value === 'Direção') {
+            direcaoBlock.style.display = 'block';
+            direcaoInput.focus();
+          } else {
+            direcaoBlock.style.display = 'none';
+          }
+        });
+
+        // permitir submit também pelo Enter no input de código
+        direcaoInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            submitClasse();
+          }
+        });
+
+        document.getElementById('confirmClasseBtn')
+          .addEventListener('click', submitClasse);
+      });
+    }
+
+    // tenta buscar id existente na tabela a partir do email
+    async function fetchIdByEmail(email) {
+      if (!email) return null;
+      try {
+        const { data, error } = await supabase
+          .from('dadoscetep')
+          .select('id')
+          .eq('email', email)
+          .limit(1)
+          .maybeSingle();
+        if (error) {
+          console.warn('Erro ao buscar id por email:', error);
+          return null;
+        }
+        if (data && data.id !== undefined && data.id !== null) return data.id;
+        return null;
+      } catch (e) {
+        console.error('fetchIdByEmail error:', e);
+        return null;
+      }
+    }
+
+    async function submitClasse() {
+      const select = document.getElementById('classeSelect');
+      const classe = select.value;
+
+      if (!classe) {
+        showMsg('Selecione uma opção!', 'info', 3000);
+        return;
+      }
+
+      // Se for Direção, exige código "Kronos"
+      if (classe === 'Direção') {
+        const codeInput = document.getElementById('direcaoCode');
+        const code = (codeInput && codeInput.value) ? String(codeInput.value).trim() : '';
+        if (!code) {
+          showMsg('Digite o código de confirmação para Direção.', 'info', 3000);
+          codeInput && codeInput.focus();
+          return;
+        }
+        // comparação case-insensitive — aceita "Kronos", "kronos", etc.
+        if (code.toLowerCase() !== 'kronos'.toLowerCase()) {
+          showMsg('Código incorreto para Direção.', 'info', 3500);
+          codeInput && codeInput.focus();
+          return;
+        }
+        // se chegou aqui, código correto — segue normalmente
+      }
+
+      userData.classe = classe;
+
+      const email = (googleUser && googleUser.email) || (savedUser && savedUser.email) || '';
+      const name = (googleUser && googleUser.name) || (savedUser && savedUser.name) || '';
+
+      if (!email) {
+        showMsg('Não foi possível identificar seu email. Faça login novamente.', 'info', 5000);
+        return;
+      }
+
+      showMsg('Processando... (aguarde)', 'info', 10000);
+
+      // 1) tenta obter id do localStorage (vindo do login anterior)
+      let idFromStorage = (savedUser && savedUser.id) ? savedUser.id : (userData && userData.id ? userData.id : null);
+
+      // 2) se não tiver id, tenta buscar na tabela pelo email
+      if (!idFromStorage) {
+        const foundId = await fetchIdByEmail(email);
+        if (foundId) {
+          idFromStorage = foundId;
+          // salva no localStorage para futuras chamadas
+          userData = { ...userData, id: idFromStorage, email, name };
+          localStorage.setItem('userData', JSON.stringify(userData));
+          console.log('ID encontrado na tabela e salvo no localStorage:', idFromStorage);
+        } else {
+          console.log('Nenhum id encontrado na tabela para esse email.');
+        }
+      }
+
+      // 3) prepara payload: inclui id se disponível (para evitar erro null em colunas id NOT NULL)
+      const payload = {};
+      if (idFromStorage !== null && idFromStorage !== undefined) payload.id = idFromStorage;
+      payload.nome = name;
+      payload.email = email;
+      payload.classe = classe;
+
+      try {
+        // 4) upsert com onConflict no email — se id existe, será usado; se não existir, depende da tabela aceitar insert sem id
+        const { data: upsertData, error: upsertError } = await supabase
+          .from('dadoscetep')
+          .upsert([payload], { onConflict: 'email' });
+
+        if (upsertError) {
+          console.error('Upsert error:', upsertError);
+          // se o erro indicar id null, mostramos instrução específica
+          if (upsertError.message && upsertError.message.toLowerCase().includes('null value in column "id"')) {
+            showMsg('Erro: coluna id exige valor. Verifique a página de login para garantir que o id seja salvo no localStorage.', 'info', 8000);
+          } else {
+            showMsg('Falha ao salvar (ver console).', 'info', 6000);
+          }
+          return;
+        }
+
+        // 5) após upsert, garante que temos o id: busca a linha e salva id no localStorage
+        const { data: rowAfter, error: selErr } = await supabase
+          .from('dadoscetep')
+          .select('id,nome,email,classe,created_at')
+          .eq('email', email)
+          .limit(1)
+          .maybeSingle();
+
+        if (selErr) {
+          console.warn('Erro ao confirmar linha após upsert:', selErr);
+          showMsg('Dados enviados, mas não foi possível confirmar leitura (ver console).', 'info', 6000);
+        } else if (rowAfter && (rowAfter.id !== undefined && rowAfter.id !== null)) {
+          // salva no localStorage para futuras requisições
+          userData = { ...userData, id: rowAfter.id, email: rowAfter.email, nome: rowAfter.nome, classe: rowAfter.classe };
+          localStorage.setItem('userData', JSON.stringify(userData));
+          console.log('Registro confirmado e id salvo localmente:', rowAfter.id);
+          showMsg('✓ Dados salvos com sucesso!', 'success', 1400);
+          setTimeout(()=> window.location.href = 'dashboard.html', 900);
+        } else {
+          // não retornou id — possível problema na tabela (coluna id sem default)
+          console.warn('Upsert ocorreu, mas não foi possível obter id do registro. Verifique estrutura da tabela.');
+          showMsg('Registro salvo, mas id não foi retornado. Verifique configuração da tabela (coluna id).', 'info', 7000);
+          // mesmo assim segue para dashboard (ou você pode optar por não redirecionar)
+          setTimeout(()=> window.location.href = 'dashboard.html', 900);
+        }
+
+      } catch (e) {
+        console.error('Erro inesperado ao salvar:', e);
+        showMsg('Erro inesperado (ver console).', 'info', 6000);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

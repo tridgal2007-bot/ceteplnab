@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agendamentos</title>
+
+  <!-- Fonte Jersey 15 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Jersey 15', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #bbdefb);
+      color: #1f2937;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      overflow-x: hidden;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 0 12px;
+      max-width: 800px;
+    }
+
+    .header h1 {
+      color: #0d47a1;
+      font-size: 2.1rem;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #42a5f5;
+      font-size: 1.05rem;
+      letter-spacing: 0.3px;
+    }
+
+    .users-container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .user-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(36, 59, 85, 0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .user-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(36, 59, 85, 0.12);
+    }
+
+    .user-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #2563eb;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #0d47a1;
+      margin-bottom: 12px;
+    }
+
+    .agenda-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .agenda-item {
+      background: #f8fbff;
+      padding: 12px;
+      border-radius: 10px;
+      border-left: 3px solid #2563eb;
+    }
+
+    .agenda-item strong {
+      color: #1565c0;
+      display: inline-block;
+      min-width: 110px;
+      font-size: 0.95rem;
+    }
+
+    .agenda-item span {
+      color: #37474f;
+      font-size: 0.95rem;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px 20px;
+      color: #64b5f6;
+      font-size: 1.2rem;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(36, 59, 85, 0.06);
+      max-width: 600px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.7rem; }
+      .user-card { padding: 16px; gap: 14px; }
+      .user-avatar { width: 60px; height: 60px; }
+      .user-name { font-size: 1.15rem; }
+      .agenda-item strong { min-width: 90px; font-size: 0.9rem; }
+      .agenda-item span { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Agendamentos de Laboratórios (GLOBAL)</h1>
+    <p>Agendamento de todos os usuários</p>
+  </div>
+
+  <div class="users-container" id="usersContainer"></div>
+  <div id="noData" class="no-data" style="display:none;">Nenhum agendamento encontrado.</div>
+
+  <script type="module">
+    // ✅ SDK SEM espaços
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // ✅ URLs SEM espaços
+    const supabaseUrl = "https://zszcwubydhgoyhxbxfro.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const usersContainer = document.getElementById('usersContainer');
+    const noDataEl = document.getElementById('noData');
+
+    async function fetchAgendamentosComUsuarios() {
+      try {
+        const { data: agendamentos, error: agendamentosError } = await supabase
+          .from('agendamentos')
+          .select('user_email, lab_nome, dia, turno, horario')
+          .order('dia', { ascending: true });
+
+        if (agendamentosError) throw agendamentosError;
+        if (!agendamentos || agendamentos.length === 0) {
+          noDataEl.style.display = "block";
+          return;
+        }
+
+        const emails = [...new Set(agendamentos.map(a => a.user_email).filter(Boolean))];
+        if (emails.length === 0) {
+          noDataEl.style.display = "block";
+          return;
+        }
+
+        const { data: usuarios, error: usuariosError } = await supabase
+          .from('dadoscetep')
+          .select('nome, email, foto')
+          .in('email', emails);
+
+        const usuarioMap = {};
+        (usuarios || []).forEach(u => {
+          usuarioMap[u.email.toLowerCase()] = u;
+        });
+
+        const agendamentosPorUsuario = {};
+        agendamentos.forEach(agenda => {
+          const email = agenda.user_email?.toLowerCase();
+          if (!email) return;
+
+          if (!agendamentosPorUsuario[email]) {
+            agendamentosPorUsuario[email] = {
+              usuario: usuarioMap[email] || { nome: null, email: agenda.user_email, foto: null },
+              agendamentos: []
+            };
+          }
+          agendamentosPorUsuario[email].agendamentos.push(agenda);
+        });
+
+        Object.values(agendamentosPorUsuario).forEach(({ usuario, agendamentos }) => {
+          const card = document.createElement('div');
+          card.className = 'user-card';
+
+          let agendaHTML = '';
+          agendamentos.forEach(a => {
+            const horarios = Array.isArray(a.horario) ? a.horario.join(', ') : (a.horario || '-');
+            const diaFormatado = a.dia ? new Date(a.dia).toLocaleDateString('pt-BR') : '-';
+            agendaHTML += `
+              <div class="agenda-item">
+                <strong>Lab:</strong> <span>${a.lab_nome || '-'}</span><br>
+                <strong>Dia:</strong> <span>${diaFormatado}</span><br>
+                <strong>Horário:</strong> <span>${horarios}</span><br>
+                <strong>Turno:</strong> <span>${a.turno || '-'}</span>
+              </div>
+            `;
+          });
+
+          const nomeExibido = usuario.nome || usuario.email || 'Usuário';
+          const imageUrl = usuario.foto || 'https://via.placeholder.com/72/2563eb/ffffff?text=U';
+
+          card.innerHTML = `
+            <img src="${imageUrl}" alt="Foto de ${nomeExibido}" class="user-avatar" onerror="this.src='https://via.placeholder.com/72/2563eb/ffffff?text=U'">
+            <div class="user-info">
+              <div class="user-name">${nomeExibido}</div>
+              <div class="agenda-list">${agendaHTML}</div>
+            </div>
+          `;
+
+          usersContainer.appendChild(card);
+        });
+
+        if (usersContainer.children.length === 0) {
+          noDataEl.style.display = "block";
+        }
+
+      } catch (e) {
+        console.error("Erro crítico:", e);
+        noDataEl.textContent = "Erro ao carregar dados. Verifique o console (F12).";
+        noDataEl.style.display = "block";
+      }
+    }
+
+    fetchAgendamentosComUsuarios();
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login com Google</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <!-- Remova temporariamente a imagem se não tiver certeza do caminho -->
+      <!--
+      <div class="avatar">
+        <img src="imagen/MyPhoto_03_09_2025_15_53_13.png" alt="User Icon">
+      </div>
+      -->
+      <h2>ENTRAR</h2>
+
+      <div id="g_id_onload"
+           data-client_id="240571935743-6vdr0p8b7l3esqk940i514uoqmepa8e1.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+
+      <div class="g_id_signin" 
+           data-type="standard"
+           data-shape="pill"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="left">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Corrigido: sem espaços na URL
+    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+    async function handleCredentialResponse(response) {
+      try {
+        if (!response?.credential) throw new Error('Token inválido');
+
+        const token = response.credential;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const { name, email, picture, sub: googleId } = payload;
+
+        // Salva no localStorage
+        localStorage.setItem("googleToken", token);
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("userName", name);
+
+        // ⚠️ ATENÇÃO: Se sua coluna 'id' é UUID, ISSO VAI FALHAR!
+        // Só use se 'id' for TEXT. Caso contrário, veja a Opção 2 na explicação.
+        const { error } = await supabase
+          .from('dadoscetep')
+          .upsert(
+            {
+              id: googleId,
+              nome: name,
+              email: email,
+              picture: picture,
+              ultimo_login: new Date().toISOString()
+            },
+            { onConflict: 'id' }
+          );
+
+        if (error) throw error;
+
+        window.location.href = "home.html";
+
+      } catch (err) {
+        console.error("Erro:", err);
+        alert("Falha ao fazer login. Verifique o console (F12).");
+      }
+    }
+
+    window.handleCredentialResponse = handleCredentialResponse;
+  </script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Minha Agenda — Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Jersey 15 (fonte principal solicitada) -->
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+
+    <style>
+      :root{
+        --bg-a: #0f172a; /* deep night */
+        --bg-b: #071233; /* deep blue */
+        --card: rgba(255,255,255,0.06);
+        --glass: rgba(255,255,255,0.06);
+        --muted: rgba(255,255,255,0.7);
+        --accent: #a7ff83; /* lime-neon */
+        --accent-2: #66d9ff;
+        --glass-border: rgba(167,255,131,0.18);
+        --shadow: 0 6px 24px rgba(3,8,23,0.6);
+        --radius: 14px;
+        font-size: 16px;
+      }
+
+      /* Apply Jersey 15 as the single primary font across the dashboard */
+      *{box-sizing:border-box;margin:0;padding:0}
+      html,body{height:100%}
+      body{
+        font-family: 'Jersey 15', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: radial-gradient(1200px 600px at 10% 10%, rgba(102,217,255,0.06), transparent), linear-gradient(150deg,var(--bg-a),var(--bg-b));
+        color: #e6eef8;
+        min-height:100vh;
+        padding:24px;
+        display:flex;
+        align-items:flex-start;
+        justify-content:center;
+      }
+
+      .wrap{
+        width: min(1120px, 96%);
+        display:grid;
+        grid-template-columns: 360px 1fr;
+        gap: 26px;
+        align-items:start;
+      }
+
+      /* LEFT: Profile column */
+      .profile-card{
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255,255,255,0.03);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .avatar-wrap{
+        display:flex;
+        gap:16px;
+        align-items:center;
+      }
+
+      .avatar-box{
+        width:96px;
+        height:96px;
+        border-radius:12px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border: 2px solid var(--glass-border);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        flex: 0 0 96px;
+        position:relative;
+      }
+
+      .avatar-box img{
+        width:86px;height:86px;object-fit:cover;border-radius:10px;display:block;
+      }
+
+      .profile-info{
+        background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+        padding: 10px 14px;
+        border-radius:10px;
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        height:96px;
+        border-left: 3px solid rgba(255,255,255,0.02);
+      }
+
+      .profile-name{
+        font-weight:700;
+        font-size:1.125rem;
+        color: #ffffff;
+        letter-spacing:0.2px;
+      }
+
+      .profile-role{
+        margin-top:6px;
+        color:var(--muted);
+        font-size:0.95rem;
+      }
+
+      .profile-actions{
+        margin-top:18px;
+        display:flex;gap:12px;flex-wrap:wrap;
+      }
+
+      .btn{
+        appearance:none;border:0;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:600;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#06202b;box-shadow:0 8px 18px rgba(0,0,0,0.45);transition:transform .16s ease, box-shadow .16s ease;display:inline-flex;align-items:center;gap:8px;
+      }
+      .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+      .btn:active{transform:translateY(1px)}
+
+      .stats{
+        display:flex;gap:10px;margin-top:18px;align-items:center;justify-content:space-between
+      }
+
+      .stat-item{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;flex:1;text-align:center}
+      .stat-item .num{font-weight:700;font-size:1.05rem}
+      .stat-item .label{font-size:0.85rem;color:var(--muted);margin-top:6px}
+
+      /* RIGHT: Main content */
+      .main-card{
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius:var(--radius);
+        padding:20px;
+        box-shadow:var(--shadow);
+        border: 1px solid rgba(255,255,255,0.03);
+      }
+
+      .toolbar{
+        display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;
+      }
+
+      .search{
+        flex:1;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)
+      }
+      .search input{flex:1;background:transparent;border:0;outline:none;color:inherit;font-size:0.95rem}
+
+      .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+
+      .action-card{
+        background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+        border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:10px;align-items:flex-start;justify-content:center;min-height:140px;position:relative;overflow:hidden
+      }
+
+      .action-card .title{font-weight:700;color:#fff}
+      .action-card .desc{color:var(--muted);font-size:0.9rem}
+      .action-card .big-btn{margin-top:auto;align-self:stretch}
+
+      /* Animated frame button style — keeps image in a smaller box and text to the right */
+      .animated-cta{
+        display:flex;gap:12px;align-items:center;width:100%;
+      }
+      .animated-cta .thumb{
+        width:78px;height:78px;border-radius:10px;flex:0 0 78px;overflow:hidden;border:2px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      }
+      .animated-cta img{width:100%;height:100%;object-fit:cover;display:block}
+      .animated-cta .meta{flex:1}
+      .animated-cta .meta h3{margin:0;font-size:1rem}
+      .animated-cta .meta p{margin:6px 0 0;color:var(--muted);font-size:0.9rem}
+
+      .footer-note{margin-top:18px;color:var(--muted);font-size:0.9rem}
+
+      /* Partículas suaves por clique */
+      .particle{position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:10000;mix-blend-mode:screen}
+
+      /* ---------- MOBILE RESPONSIVE ---------- */
+      @media (max-width: 880px) {
+        body {
+          padding: 16px;
+        }
+
+        .wrap {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        /* Perfil empilhado */
+        .profile-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .avatar-wrap {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .profile-info {
+          width: 100%;
+          height: auto;
+          border-left: none;
+          border-radius: 12px;
+          padding: 12px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+        }
+
+        .profile-actions {
+          width: 100%;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .profile-actions .btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        /* Toolbar empilhada */
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .search {
+          width: 100%;
+        }
+
+        /* Cards empilhados */
+        .cards-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        /* Tamanhos menores para mobile */
+        .avatar-box {
+          width: 100px;
+          height: 100px;
+        }
+        .avatar-box img {
+          width: 90px;
+          height: 90px;
+        }
+
+        .animated-cta .thumb {
+          width: 70px;
+          height: 70px;
+        }
+
+        .btn {
+          padding: 12px;
+          font-size: 0.95rem;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .avatar-box {
+          width: 80px;
+          height: 80px;
+        }
+        .avatar-box img {
+          width: 72px;
+          height: 72px;
+        }
+
+        .animated-cta .thumb {
+          width: 60px;
+          height: 60px;
+        }
+
+        .profile-name {
+          font-size: 1rem;
+        }
+
+        .footer-note {
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+
+  <body>
+    <div class="wrap">
+
+      <!-- LEFT: Perfil -->
+      <aside class="profile-card" aria-label="Informações do usuário">
+        <div class="avatar-wrap">
+          <div class="avatar-box" id="avatarBox" title="Clique para celebrar">
+            <img id="userPicture" src="imagen/default.png" alt="Foto do usuário">
+          </div>
+
+          <div class="profile-info">
+            <div class="profile-name" id="userNick">Carregando...</div>
+            <div class="profile-role" id="userRole">—</div>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn" id="openCalendar">Abrir Agenda</button>
+          <button class="btn ghost" id="editProfile">Editar</button>
+        </div>
+
+        <div class="stats" aria-hidden>
+          <div class="stat-item"><div class="num">12</div><div class="label">Agendamentos</div></div>
+          <div class="stat-item"><div class="num">3</div><div class="label">Alertas</div></div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT: Conteúdo principal -->
+      <main class="main-card">
+        <div class="toolbar">
+          <div class="search" role="search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M21 21l-4.35-4.35" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <circle cx="11" cy="11" r="5" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"></circle>
+            </svg>
+            <input id="searchInput" type="search" placeholder="Buscar agendamentos, laboratórios ou pessoas…" aria-label="Buscar">
+          </div>
+          <div style="display:flex;gap:10px;align-items:center; width: 100%;">
+            <button class="btn ghost" id="refreshBtn" style="flex:1;">Atualizar</button>
+            <button class="btn" id="newBtn" style="flex:1;">+ Novo</button>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+
+          <!-- Agendar (grande) -->
+          <section class="action-card" aria-labelledby="agendarTitle">
+            <div class="animated-cta">
+              <div class="thumb" aria-hidden>
+                <img src="imagen/agendar.png" alt="Agendar ícone">
+              </div>
+              <div class="meta">
+                <h3 id="agendarTitle">Agendar</h3>
+                <p>Agende rapidamente laboratórios e salas com disponibilidade inteligente.</p>
+              </div>
+            </div>
+            <button class="btn big-btn" onclick="location.href='agendar.html'">Ir para Agendamento</button>
+          </section>
+
+          <!-- Agenda global (frames) -->
+          <section class="action-card" aria-labelledby="globalTitle">
+            <div class="animated-cta" id="agendadosBtn" role="button" tabindex="0" aria-pressed="false">
+              <div class="thumb">
+                <img id="agendados-img" src="imagen/frame3.png" alt="Agenda global" />
+              </div>
+              <div class="meta">
+                <h3 id="globalTitle">Agenda (Global)</h3>
+                <p>Veja todos os agendamentos em tempo real. Clique para abrir a visão completa.</p>
+              </div>
+            </div>
+            <button class="btn ghost big-btn" id="openGlobal">Abrir Agenda Global</button>
+          </section>
+
+          <!-- Minha agenda -->
+          <section class="action-card" aria-labelledby="minhaTitle">
+            <div class="animated-cta">
+              <div class="thumb" aria-hidden>
+                <img src="imagen/minhas-agenda.png" alt="Minha agenda">
+              </div>
+              <div class="meta">
+                <h3 id="minhaTitle">Minha Agenda</h3>
+                <p>Lista personalizada com seus próximos horários e ações rápidas.</p>
+              </div>
+            </div>
+            <button class="btn big-btn" onclick="location.href='minha-agenda.html'">Ver Minha Agenda</button>
+          </section>
+
+        </div>
+
+        <div class="footer-note">Dica: clique na foto para celebrar (efeito visual).</div>
+      </main>
+
+    </div>
+
+    <script>
+      // Supabase (sem espaços extras)
+      const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
+      const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
+      const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+      function parseJwt(token){ try{ if(!token) return null; const parts = token.split('.'); if(parts.length<2) return null; const base64 = parts[1].replace(/-/g,'+').replace(/_/g,'/'); const jsonPayload = decodeURIComponent(atob(base64).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); return JSON.parse(jsonPayload);}catch(e){return null}}
+
+      // Partículas suaves
+      function createParticles(x,y, count=12){ const colors=['#a7ff83','#66d9ff','#b8ffcf']; for(let i=0;i<count;i++){ const el=document.createElement('div'); el.className='particle'; el.style.left=(x + (Math.random()-0.5)*40)+'px'; el.style.top=(y + (Math.random()-0.5)*10)+'px'; el.style.background=colors[Math.floor(Math.random()*colors.length)]; el.style.opacity='1'; el.style.transform='scale(0.6)'; document.body.appendChild(el); const dur=700 + Math.random()*500; const dx=(Math.random()-0.5)*120; const dy= -40 - Math.random()*140; const start=performance.now(); function tick(now){ const t=(now-start)/dur; if(t>=1){ el.remove(); return } const ease = 1 - Math.pow(1 - t, 3); el.style.left = (x + dx * ease) + 'px'; el.style.top = (y + dy * ease) + 'px'; el.style.opacity = String(1 - ease); el.style.transform = 'scale(' + (0.6 + 0.4*ease) + ')'; requestAnimationFrame(tick); } requestAnimationFrame(tick); } }
+
+      async function init(){
+        // Obtém email da sessão (localStorage ou token Google)
+        let email = localStorage.getItem('userEmail') || null;
+        if(!email){ const token = localStorage.getItem('googleToken'); const payload = parseJwt(token); if(payload && payload.email) email = payload.email }
+        if(!email){ console.warn('Sessão não encontrada'); return }
+
+        try{
+          const { data, error } = await supabase.from('dadoscetep').select('nome, classe, email, nick, picture').eq('email', email).single();
+          if(error || !data){ console.error('Erro ao buscar usuário:', error); return }
+
+          document.getElementById('userNick').textContent = data.nome || data.nick || 'Usuário';
+          document.getElementById('userRole').textContent = data.classe || '—';
+          document.getElementById('userPicture').src = data.picture || 'imagen/default.png';
+          localStorage.setItem('userData', JSON.stringify(data));
+        }catch(err){ console.error('Falha ao init:', err) }
+
+        // avatar click
+        const avatar = document.getElementById('avatarBox');
+        avatar.addEventListener('click', (e)=>{
+          const r = avatar.getBoundingClientRect(); createParticles(r.left + r.width/2, r.top + r.height/2, 14);
+        });
+
+        // agendados animation frames (sequência 316245)
+        const frameImages = ['frame3.png','frame1.png','frame6.png','frame2.png','frame4.png','frame5.png'];
+        let currentFrame = 0;
+        const agendadosImg = document.getElementById('agendados-img');
+        if(agendadosImg){
+          setInterval(()=>{
+            currentFrame = (currentFrame + 1) % frameImages.length;
+            agendadosImg.src = `imagen/${frameImages[currentFrame]}`;
+          }, 250);
+        }
+
+        // botões
+        const agendadosBtn = document.getElementById('agendadosBtn');
+        if(agendadosBtn){
+          agendadosBtn.addEventListener('click', ()=> location.href='agendados.html');
+          agendadosBtn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') location.href='agendados.html' });
+        }
+
+        document.getElementById('openGlobal').addEventListener('click', ()=> location.href='agendados.html');
+        document.getElementById('openCalendar').addEventListener('click', ()=> location.href='agendar.html');
+        document.getElementById('newBtn').addEventListener('click', ()=> location.href='agendar.html');
+        document.getElementById('refreshBtn').addEventListener('click', ()=> location.reload());
+      }
+
+      window.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>
