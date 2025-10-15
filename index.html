@@ -1,45 +1,187 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login com Google</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Google Identity Services -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Entrar — Sistema</title>
+
+  <!-- Fonte Jersey 15 -->
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+
+  <!-- Google Identity & Supabase -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg-1: #06070a;
+      --bg-2: #0b1220;
+      --accent: #38bdf8;
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.04);
+      --card-radius: 18px;
+      --text: #e6f0ff;
+      --muted: #9fb3c9;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Jersey 15", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 500px at 10% 10%, rgba(56,189,248,0.06), transparent 8%),
+        radial-gradient(900px 400px at 90% 90%, rgba(99,102,241,0.04), transparent 8%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+      overflow:hidden;
+    }
+
+    .orchid, .ember {
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+      filter: blur(48px);
+      opacity:0.9;
+    }
+
+    .orchid {
+      width:560px;
+      height:560px;
+      right:-160px;
+      top:-140px;
+      background: conic-gradient(from 120deg, rgba(56,189,248,0.06), rgba(99,102,241,0.04));
+      transform: rotate(12deg);
+    }
+
+    .ember {
+      left:-220px;
+      bottom:-120px;
+      width:420px;
+      height:420px;
+      background: radial-gradient(circle at 30% 20%, rgba(99,102,241,0.05), transparent 25%);
+      filter: blur(40px);
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius: var(--card-radius);
+      padding:36px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:420px;
+      width:100%;
+      max-width:460px;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 20px 60px rgba(2,6,23,0.6);
+      position:relative;
+      z-index:2;
+      backdrop-filter: blur(8px) saturate(120%);
+    }
+
+    .avatar {
+      width:96px;
+      height:96px;
+      border-radius:22px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:18px;
+      border: 1px solid rgba(255,255,255,0.035);
+      box-shadow: 0 6px 22px rgba(2,6,23,0.5);
+    }
+
+    .avatar img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:inherit;
+    }
+
+    h2.title {
+      margin:0 0 8px 0;
+      font-size:34px;
+      letter-spacing:2px;
+      color:var(--text);
+      text-shadow: 0 2px 18px rgba(56,189,248,0.06);
+    }
+
+    .g_id_container {
+      width:100%;
+      display:flex;
+      justify-content:center;
+    }
+
+    .g_id_signin {
+      transform-origin:center;
+      border-radius:999px !important;
+      transition: transform .28s ease, box-shadow .28s ease;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.45);
+    }
+    .g_id_signin:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 14px 40px rgba(2,6,23,0.6);
+    }
+
+    .hint {
+      margin-top:18px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .wave {
+      position:absolute;
+      left:12px;
+      right:12px;
+      bottom:12px;
+      height:64px;
+      border-radius:12px;
+      background: linear-gradient(90deg, rgba(56,189,248,0.03), rgba(99,102,241,0.02));
+      filter: blur(12px);
+      opacity:0.9;
+    }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-box">
-      <!-- Remova temporariamente a imagem se não tiver certeza do caminho -->
-      <!--
-      <div class="avatar">
-        <img src="imagen/MyPhoto_03_09_2025_15_53_13.png" alt="User Icon">
-      </div>
-      -->
-      <h2>ENTRAR</h2>
+  <div class="orchid" aria-hidden="true"></div>
+  <div class="ember" aria-hidden="true"></div>
 
-      <div id="g_id_onload"
-           data-client_id="240571935743-6vdr0p8b7l3esqk940i514uoqmepa8e1.apps.googleusercontent.com"
-           data-callback="handleCredentialResponse"
-           data-auto_prompt="false">
-      </div>
+  <section class="card" aria-label="Área de login">
+    <div class="avatar">
+      <img src="cetep.png" alt="CETEP Logo">
+    </div>
+    <h2 class="title">ENTRAR</h2>
 
-      <div class="g_id_signin" 
+    <div id="g_id_onload"
+         data-client_id="240571935743-6vdr0p8b7l3esqk940i514uoqmepa8e1.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+
+    <div class="g_id_container">
+      <div class="g_id_signin"
            data-type="standard"
            data-shape="pill"
-           data-theme="outline"
-           data-text="signin_with"
+           data-theme="filled_blue"
+           data-text="continue_with"
            data-size="large"
            data-logo_alignment="left">
       </div>
     </div>
-  </div>
+
+    <p class="hint">Ao entrar, você será redirecionado conforme o seu cadastro.</p>
+
+    <div class="wave" aria-hidden="true"></div>
+  </section>
 
   <script>
-    // ✅ Corrigido: sem espaços na URL
     const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -47,38 +189,50 @@
     async function handleCredentialResponse(response) {
       try {
         if (!response?.credential) throw new Error('Token inválido');
-
         const token = response.credential;
         const payload = JSON.parse(atob(token.split('.')[1]));
         const { name, email, picture, sub: googleId } = payload;
 
-        // Salva no localStorage
         localStorage.setItem("googleToken", token);
         localStorage.setItem("userEmail", email);
         localStorage.setItem("userName", name);
 
-        // ⚠️ ATENÇÃO: Se sua coluna 'id' é UUID, ISSO VAI FALHAR!
-        // Só use se 'id' for TEXT. Caso contrário, veja a Opção 2 na explicação.
-        const { error } = await supabase
+        const { data: existing, error: selectError } = await supabase
           .from('dadoscetep')
-          .upsert(
-            {
-              id: googleId,
-              nome: name,
-              email: email,
+          .select('id')
+          .eq('email', email)
+          .limit(1);
+
+        if (selectError) throw selectError;
+        const exists = Array.isArray(existing) && existing.length > 0;
+
+        if (exists) {
+          await supabase.from('dadoscetep')
+            .update({
+              ultimo_login: new Date().toISOString(),
               picture: picture,
-              ultimo_login: new Date().toISOString()
-            },
-            { onConflict: 'id' }
-          );
+              nome: name
+            })
+            .eq('email', email);
+          window.location.href = "dashboard.html";
+          return;
+        }
 
-        if (error) throw error;
+        const { error: upsertError } = await supabase
+          .from('dadoscetep')
+          .upsert({
+            id: googleId,
+            nome: name,
+            email: email,
+            picture: picture,
+            ultimo_login: new Date().toISOString()
+          }, { onConflict: 'id' });
 
+        if (upsertError) throw upsertError;
         window.location.href = "home.html";
-
       } catch (err) {
-        console.error("Erro:", err);
-        alert("Falha ao fazer login. Verifique o console (F12).");
+        console.error('Erro no login:', err);
+        alert('Falha ao processar login. Veja o console (F12) para detalhes.');
       }
     }
 
