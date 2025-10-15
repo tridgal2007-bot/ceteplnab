@@ -3,278 +3,140 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minha Agenda</title>
-  <!-- Supabase client (UMD) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <title>Meus Agendamentos</title>
   <style>
-    :root{
-      --card-bg: #ffffff;
-      --page-bg: #f4f7fb;
+    :root {
+      --bg: #f4f7fb;
+      --card-bg: #fff;
       --primary: #2563eb;
-      --muted: #9aa4b2;
-      --danger: #ef4444;
-      --success: #10b981;
-      --radius: 10px;
+      --text: #1f2937;
+      --muted: #9ca3af;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg,var(--page-bg), #ffffff);
-      color:#1f2937; display:flex; flex-direction:column; align-items:center; padding:28px;
+    body {
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
-
-    h1{ margin:0; font-size:1.6rem; letter-spacing:0.2px }
-    .subtitle{ margin:8px 0 20px; color:var(--muted) }
-
-    .next-appointment-box {
-      width:100%; max-width:800px; margin-top:18px;
-      background: linear-gradient(135deg, #121726, #53555c);
-      color:#fff; border-radius:12px; padding:18px;
-      box-shadow: 0 10px 30px rgba(2,6,23,0.25);
-      display:flex; flex-direction:column; align-items:center; gap:8px;
-      text-align:center;
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 2rem;
+      width: 100%;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .next-appointment-box .title { 
-      font-size:1.05rem; font-weight:700; color:#e0f2fe; 
+    .container {
+      margin-top: 2rem;
+      width: 90%;
+      max-width: 800px;
     }
-    .next-appointment-box .message { 
-      color:#bae6fd; font-size:0.96rem; 
+    .card {
+      background: var(--card-bg);
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+      transition: 0.2s;
     }
-    .next-appointment-box .countdown {
-      margin-top:6px; font-size:1.75rem; font-weight:800; letter-spacing:1px;
-      background: linear-gradient(90deg, #60a5fa, #38bdf8);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     }
-    .next-appointment-box .sub { 
-      color:#93c5fd; font-size:0.88rem; 
+    .card h3 {
+      margin: 0 0 .5rem 0;
+      color: var(--primary);
+      font-size: 1.2rem;
     }
-    .next-appointment-box .happening {
-      background: linear-gradient(135deg, #065f46, #064e3b);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-      font-weight: bold;
-      color: #bbf7d0;
+    .card p {
+      margin: .2rem 0;
+      color: var(--text);
     }
-
-    .agenda-list{ width:100%; max-width:800px; margin-top:18px; background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 18px rgba(36,59,85,0.04) }
-    table{ width:100%; border-collapse:collapse; font-size:0.95rem }
-    th, td{ text-align:left; padding:10px 8px; border-bottom:1px solid #f1f5f9 }
-    th{ color:#374151; font-weight:600 }
-    .empty-message { 
-      color:#475569; 
-      padding:16px; 
-      text-align:center; 
-      font-style: italic;
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 3rem;
+      font-size: 1.1rem;
     }
-
-    @media (max-width: 480px) {
-      .next-appointment-box .countdown {
-        font-size:1.25rem;
-      }
-      .agenda-list {
-        padding:8px;
-      }
-      table {
-        font-size:0.85rem;
-      }
-      th, td {
-        padding:6px 4px;
-      }
+    .logout-btn {
+      margin-top: 2rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: .8rem 1.5rem;
+      border-radius: .8rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .logout-btn:hover {
+      background: #1d4ed8;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-  <h1>Minha Agenda</h1>
-  <div class="subtitle">Visualize seus agendamentos atuais e próximos horários (dados via Supabase)</div>
-
-  <div id="nextAppointmentBox" class="next-appointment-box" style="display: none;" role="status" aria-live="polite">
-    <div class="title" id="nextTitle">Próximo agendamento</div>
-    <div class="message" id="nextMessage"></div>
-    <div class="countdown" id="nextCountdown">--:--:--</div>
-    <div class="sub" id="nextSub">Tempo até o início</div>
+  <header>📅 Meus Agendamentos</header>
+  <div class="container" id="agendaContainer">
+    <p class="empty">Carregando seus agendamentos...</p>
   </div>
 
-  <div class="agenda-list" id="agendaList" aria-live="polite"></div>
+  <button class="logout-btn" onclick="logout()">Sair</button>
 
   <script>
-    // --- Substitua pelos valores do seu projeto Supabase ---
-    const SUPABASE_URL = 'https://zszcwubydhgoyhxbxfro.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
-    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-    // helpers de semana
-    function getWeekRangeFor(date = new Date()){
-      const d = new Date(date);
-      const day = d.getDay();
-      const monday = new Date(d);
-      monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-      monday.setHours(0,0,0,0);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      sunday.setHours(23,59,59,999);
-      return { start: monday.toISOString(), end: sunday.toISOString() };
-    }
+    const userEmail = localStorage.getItem("userEmail");
+    const container = document.getElementById("agendaContainer");
 
-    // fetch do Supabase (apenas a semana atual)
-    async function fetchAgendamentosFromDb(){
-      const { start, end } = getWeekRangeFor(new Date());
-      try{
-        const { data, error } = await supabase
-          .from('agendamentos')
-          .select('*')
-          .gte('dia', start)
-          .lte('dia', end)
-          .order('dia', { ascending: true });
-        if(error){
-          console.error('Erro Supabase:', error);
-          return [];
-        }
-        return data || [];
-      }catch(e){
-        console.error('Exceção ao buscar agendamentos:', e);
-        return [];
-      }
-    }
-
-    const agendaListEl = document.getElementById('agendaList');
-    const nextAppointmentBox = document.getElementById('nextAppointmentBox');
-    const nextMessageEl = document.getElementById('nextMessage');
-    const nextCountdownEl = document.getElementById('nextCountdown');
-    const nextSubEl = document.getElementById('nextSub');
-
-    function escapeHtml(str){
-      if(!str && str !== 0) return '';
-      return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[s]));
-    }
-
-    function formatDateTime(iso){
-      try{
-        return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-      }catch{return iso}
-    }
-
-    // renderiza tabela com os resultados do servidor
-    async function renderAgenda(){
-      agendaListEl.innerHTML = '<div class="empty-message">Carregando...</div>';
-      const registros = await fetchAgendamentosFromDb();
-      if(!registros || registros.length === 0){
-        agendaListEl.innerHTML = '<div class="empty-message">Nenhum agendamento nesta semana.</div>';
-        nextAppointmentBox.style.display = 'none';
+    async function carregarAgendamentos() {
+      if (!userEmail) {
+        container.innerHTML = `<p class="empty">❌ Nenhum usuário logado. Faça login novamente.</p>`;
         return;
       }
 
-      let html = `<table aria-label="Agendamentos"><thead><tr><th>Laboratório</th><th>Dia</th><th>Turno</th><th>Horários</th></tr></thead><tbody>`;
-      registros.forEach(r => {
-        const horarios = Array.isArray(r.horario) ? r.horario.join(', ') : (r.horario || '-');
-        html += `<tr>
-          <td>${escapeHtml(r.lab_nome || r.lab || '-')}</td>
-          <td>${escapeHtml(formatDateTime(r.dia))}</td>
-          <td>${escapeHtml(r.turno || '-')}</td>
-          <td>${escapeHtml(horarios)}</td>
-        </tr>`;
-      });
-      html += `</tbody></table>`;
-      agendaListEl.innerHTML = html;
+      const { data, error } = await supabase
+        .from("agendamentos")
+        .select("*")
+        .eq("user_email", userEmail)
+        .order("dia", { ascending: true });
 
-      // atualizar próximo agendamento com base nos registros do servidor
-      updateNextAppointmentFromList(registros);
-    }
-
-    // Próximo agendamento (usa o campo `dia` se for ISO com data, ou tenta extrair dos horários)
-    function parseStartFromRecord(rec){
-      // prioriza campo `dia` completo
-      if(rec.dia){
-        const dt = new Date(rec.dia);
-        if(!isNaN(dt)) return dt;
-      }
-      // fallback: tenta parsear primeiro horário (HH:MM) e usar a data de hoje
-      if(Array.isArray(rec.horario) && rec.horario.length){
-        const m = rec.horario[0].match(/(\d{2}:\d{2})/);
-        if(m){
-          const [h, min] = m[1].split(':').map(Number);
-          const now = new Date();
-          const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, min, 0, 0);
-          if(dt > now) return dt;
-        }
-      }
-      return null;
-    }
-
-    let nextTimeout = null;
-    function formatTimeLeft(ms){
-      if(ms <= 0) return '00:00:00';
-      const total = Math.floor(ms/1000);
-      const h = Math.floor(total/3600);
-      const m = Math.floor((total%3600)/60);
-      const s = total%60;
-      return [h,m,s].map(n=>String(n).padStart(2,'0')).join(':');
-    }
-
-    function requestNotificationPermission(){ if('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }
-    function showNotification(title, body){ if('Notification' in window && Notification.permission === 'granted'){ try{ new Notification(title, { body }); }catch(e){} } }
-
-    function updateNextAppointmentFromList(records){
-      if(!records || records.length===0){ nextAppointmentBox.style.display = 'none'; return; }
-      const now = new Date();
-      const candidates = [];
-      records.forEach(r=>{
-        const start = parseStartFromRecord(r);
-        if(start && start >= now) candidates.push({ rec: r, start });
-      });
-      if(candidates.length === 0){ nextAppointmentBox.style.display = 'none'; return; }
-      candidates.sort((a,b)=>a.start - b.start);
-      const next = candidates[0];
-
-      nextAppointmentBox.style.display = 'flex';
-      nextMessageEl.textContent = `${next.rec.lab_nome || next.rec.lab} — ${next.rec.turno || '-'} — ${Array.isArray(next.rec.horario)? next.rec.horario.join(', '): (next.rec.horario||'-')}`;
-
-      const diff = next.start - new Date();
-      if(diff <= 0){
-        nextCountdownEl.textContent = 'Agora!';
-        nextSubEl.textContent = 'Seu agendamento está em andamento';
-        nextAppointmentBox.querySelector('.happening')?.remove?.();
-        const htmlH = document.createElement('div'); htmlH.className='happening'; htmlH.textContent = 'Seu agendamento está acontecendo AGORA!';
-        nextAppointmentBox.appendChild(htmlH);
-        requestNotificationPermission();
-        showNotification('Agendamento em andamento', `Seu agendamento no ${next.rec.lab_nome || next.rec.lab} começou agora.`);
+      if (error) {
+        console.error(error);
+        container.innerHTML = `<p class="empty">Erro ao carregar agendamentos.</p>`;
         return;
       }
 
-      nextCountdownEl.textContent = formatTimeLeft(diff);
-      nextSubEl.textContent = 'Tempo até o início';
-
-      if(nextTimeout) clearTimeout(nextTimeout);
-      // notificar 1 minuto antes
-      const oneMinBefore = next.start.getTime() - 60000;
-      const nowMs = Date.now();
-      if(oneMinBefore > nowMs){
-        nextTimeout = setTimeout(()=>{ requestNotificationPermission(); showNotification('Agendamento em 1 minuto', `Seu agendamento no ${next.rec.lab_nome || next.rec.lab} começa em 1 minuto.`); updateNextFromServer(); }, oneMinBefore - nowMs);
-      } else {
-        // se já passou o momento de 1 minuto antes, agenda atualização para o início
-        nextTimeout = setTimeout(()=> updateNextFromServer(), diff);
+      if (!data || data.length === 0) {
+        container.innerHTML = `<p class="empty">📭 Você ainda não possui agendamentos.</p>`;
+        return;
       }
+
+      container.innerHTML = data.map(item => `
+        <div class="card">
+          <h3>${item.lab_nome || "Laboratório"}</h3>
+          <p><strong>Dia:</strong> ${item.dia}</p>
+          <p><strong>Horário:</strong> ${item.horario}</p>
+          <p><strong>Email:</strong> ${item.user_email}</p>
+        </div>
+      `).join("");
     }
 
-    // atualiza próximo agendamento buscando do servidor
-    async function updateNextFromServer(){
-      const regs = await fetchAgendamentosFromDb();
-      updateNextAppointmentFromList(regs);
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
     }
 
-    // inicialização
-    renderAgenda();
-    // atualiza o contador a cada segundo
-    setInterval(()=>{
-      // atualizar somente os elementos visuais (sem reconsultar servidor sempre)
-      // se existir um próximo já renderizado, recalcula diff com base no texto da contagem
-      const visible = nextAppointmentBox.style.display !== 'none';
-      if(visible) updateNextFromServer();
-    }, 1000);
-
-    // refetch ao voltar ao foco
-    window.addEventListener('focus', ()=>{ renderAgenda(); updateNextFromServer(); });
+    carregarAgendamentos();
   </script>
 </body>
 </html>
