@@ -3,14 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Agendamentos</title>
+  <title>Agendamentos • GLOBAL</title>
 
   <!-- Fonte Jersey 15 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
 
+  <!-- Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
+    :root {
+      --jersey-font: 'Jersey 15', system-ui, sans-serif;
+      --bg-light: #f0f9ff;
+      --bg-gradient: linear-gradient(135deg, #e0f7fa 0%, #bbdefb 100%);
+      --card-bg: white;
+      --text-primary: #0d47a1;
+      --text-secondary: #42a5f5;
+      --border-radius: 20px;
+      --shadow: 0 8px 30px rgba(13, 71, 161, 0.12);
+      --shadow-hover: 0 12px 40px rgba(13, 71, 161, 0.2);
+      --transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-gradient: linear-gradient(135deg, #0c1a2b 0%, #1a2d45 100%);
+        --card-bg: #121f33;
+        --text-primary: #60a5fa;
+        --text-secondary: #93c5fd;
+        --bg-light: #0f1b2b;
+      }
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -18,233 +44,463 @@
     }
 
     body {
-      font-family: 'Jersey 15', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #e0f7fa, #bbdefb);
-      color: #1f2937;
+      font-family: system-ui, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 20px;
-      overflow-x: hidden;
+      padding: 24px 16px;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 32px;
-      padding: 0 12px;
+      margin-bottom: 24px;
       max-width: 800px;
+      padding: 0 12px;
     }
 
     .header h1 {
-      color: #0d47a1;
-      font-size: 2.1rem;
-      letter-spacing: 0.5px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.06);
-      margin-bottom: 10px;
+      font-family: var(--jersey-font);
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+      letter-spacing: 1.2px;
+      color: var(--text-primary);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+      line-height: 1.1;
     }
 
     .header p {
-      color: #42a5f5;
-      font-size: 1.05rem;
-      letter-spacing: 0.3px;
+      font-family: var(--jersey-font);
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+      opacity: 0.9;
     }
 
-    .users-container {
+    /* ===== BARRA DE PESQUISA ===== */
+    .search-container {
       width: 100%;
       max-width: 800px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 16px 20px 16px 52px;
+      font-family: var(--jersey-font);
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      box-shadow: var(--shadow);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.4), var(--shadow-hover);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 1.4rem;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s;
+    }
+
+    .clear-btn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ===== CONTAINER DE USUÁRIOS ===== */
+    .users-container {
+      width: 100%;
+      max-width: 900px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
     .user-card {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: 0 6px 20px rgba(36, 59, 85, 0.08);
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
       display: flex;
       align-items: flex-start;
       gap: 18px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: var(--transition);
+      opacity: 0;
+      transform: translateY(20px);
+      will-change: transform, opacity;
+    }
+
+    .user-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .user-card.hidden {
+      display: none !important;
     }
 
     .user-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(36, 59, 85, 0.12);
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-hover);
     }
 
     .user-avatar {
-      width: 72px;
-      height: 72px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #2563eb;
+      border: 3px solid var(--text-secondary);
       flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
 
     .user-info {
       flex: 1;
+      min-width: 0;
     }
 
     .user-name {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #0d47a1;
-      margin-bottom: 12px;
+      font-family: var(--jersey-font);
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .agenda-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 18px;
     }
 
     .agenda-item {
-      background: #f8fbff;
-      padding: 12px;
-      border-radius: 10px;
-      border-left: 3px solid #2563eb;
+      background: var(--bg-light);
+      padding: 18px;
+      border-radius: 16px;
+      border-left: 4px solid var(--text-secondary);
     }
 
-    .agenda-item strong {
-      color: #1565c0;
+    .agenda-row {
+      display: flex;
+      margin-bottom: 6px;
+      font-family: var(--jersey-font);
+      font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+    }
+
+    .agenda-label {
+      font-weight: bold;
+      min-width: 90px;
+      color: var(--text-primary);
+    }
+
+    .agenda-value {
+      color: var(--text-primary);
+      opacity: 0.95;
+      flex: 1;
+    }
+
+    .turno-badge {
       display: inline-block;
-      min-width: 110px;
+      font-family: var(--jersey-font);
+      padding: 4px 12px;
+      border-radius: 30px;
       font-size: 0.95rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
     }
 
-    .agenda-item span {
-      color: #37474f;
-      font-size: 0.95rem;
+    .turno-manha { background: #dbeafe; color: #1d4ed8; }
+    .turno-tarde { background: #ffedd5; color: #c2410c; }
+    .turno-noite { background: #ede9fe; color: #7c3aed; }
+    .turno-outro { background: #e2e8f0; color: #475569; }
+
+    @media (prefers-color-scheme: dark) {
+      .turno-manha { background: #1e3a8a; color: #bfdbfe; }
+      .turno-tarde { background: #7c2d12; color: #fed7aa; }
+      .turno-noite { background: #5b21b6; color: #e9d5ff; }
+      .turno-outro { background: #334155; color: #cbd5e1; }
     }
 
-    .no-data {
+    .loading, .no-data {
       text-align: center;
-      padding: 40px 20px;
-      color: #64b5f6;
-      font-size: 1.2rem;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 4px 16px rgba(36, 59, 85, 0.06);
-      max-width: 600px;
+      padding: 60px 30px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      max-width: 700px;
+      width: 100%;
       margin-top: 20px;
+      font-family: var(--jersey-font);
+      font-size: clamp(1.3rem, 5vw, 1.7rem);
+      color: var(--text-secondary);
     }
 
-    @media (max-width: 600px) {
-      .header h1 { font-size: 1.7rem; }
-      .user-card { padding: 16px; gap: 14px; }
-      .user-avatar { width: 60px; height: 60px; }
-      .user-name { font-size: 1.15rem; }
-      .agenda-item strong { min-width: 90px; font-size: 0.9rem; }
-      .agenda-item span { font-size: 0.9rem; }
+    .loading i {
+      display: block;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: var(--text-secondary);
+      animation: spin 1.4s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 650px) {
+      .user-card { padding: 22px; gap: 18px; }
+      .user-avatar { width: 75px; height: 75px; }
+    }
+
+    @media (max-width: 480px) {
+      .user-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .user-avatar { margin-bottom: 16px; }
+      .user-info { width: 100%; }
+      .agenda-row {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .agenda-label, .agenda-value {
+        min-width: auto;
+      }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Agendamentos de Laboratórios (GLOBAL)</h1>
-    <p>Agendamento de todos os usuários</p>
+    <h1>AGENDAMENTOS DE LABORATÓRIOS</h1>
+    <p>GLOBAL • TODOS OS USUÁRIOS</p>
+  </div>
+
+  <!-- Barra de Pesquisa -->
+  <div class="search-container">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" class="search-input" placeholder="BUSCAR POR NOME OU E-MAIL...">
+    <button id="clearBtn" class="clear-btn">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="loading" id="loading">
+    <i class="fas fa-spinner"></i>
+    CARREGANDO AGENDAMENTOS...
   </div>
 
   <div class="users-container" id="usersContainer"></div>
-  <div id="noData" class="no-data" style="display:none;">Nenhum agendamento encontrado.</div>
+  <div class="no-data" id="noData" style="display:none;">NENHUM AGENDAMENTO ENCONTRADO.</div>
 
   <script type="module">
-    // ✅ SDK SEM espaços
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    // ✅ URLs SEM espaços
-    const supabaseUrl = "https://zszcwubydhgoyhxbxfro.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M";
+    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const usersContainer = document.getElementById('usersContainer');
     const noDataEl = document.getElementById('noData');
+    const loadingEl = document.getElementById('loading');
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
 
+    let allUsersData = []; // Armazena todos os dados para filtrar localmente
+
+    function getTurnoBadge(turno) {
+      const lower = (turno || '').toLowerCase().trim();
+      let cls = 'turno-outro', txt = turno || '—';
+      if (['manhã', 'manha'].includes(lower)) {
+        cls = 'turno-manha'; txt = 'MANHÃ';
+      } else if (lower === 'tarde') {
+        cls = 'turno-tarde'; txt = 'TARDE';
+      } else if (lower === 'noite') {
+        cls = 'turno-noite'; txt = 'NOITE';
+      }
+      return `<span class="turno-badge ${cls}">${txt}</span>`;
+    }
+
+    function filterUsers(query) {
+      const q = query.toLowerCase().trim();
+      let hasVisible = false;
+
+      allUsersData.forEach(({ card, nome, email }) => {
+        const match = nome.toLowerCase().includes(q) || email.toLowerCase().includes(q);
+        if (match) {
+          card.classList.remove('hidden');
+          hasVisible = true;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      noDataEl.style.display = hasVisible ? 'none' : 'block';
+      noDataEl.textContent = q ? 'NENHUM USUÁRIO ENCONTRADO.' : 'NENHUM AGENDAMENTO ENCONTRADO.';
+    }
+
+    // Configura busca e limpeza
+    searchInput.addEventListener('input', () => {
+      const value = searchInput.value;
+      clearBtn.classList.toggle('visible', value.length > 0);
+      filterUsers(value);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.remove('visible');
+      filterUsers('');
+      searchInput.focus();
+    });
+
+    // Busca ao pressionar Enter (opcional, já funciona com input)
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        searchInput.blur();
+      }
+    });
+
+    // Função principal de carregamento
     async function fetchAgendamentosComUsuarios() {
+      loadingEl.style.display = 'block';
+      allUsersData = [];
+
       try {
-        const { data: agendamentos, error: agendamentosError } = await supabase
+        const { data: agendamentos, error } = await supabase
           .from('agendamentos')
           .select('user_email, lab_nome, dia, turno, horario')
           .order('dia', { ascending: true });
 
-        if (agendamentosError) throw agendamentosError;
-        if (!agendamentos || agendamentos.length === 0) {
-          noDataEl.style.display = "block";
+        if (error) throw error;
+        if (!agendamentos?.length) {
+          loadingEl.style.display = 'none';
+          noDataEl.style.display = 'block';
           return;
         }
 
         const emails = [...new Set(agendamentos.map(a => a.user_email).filter(Boolean))];
-        if (emails.length === 0) {
-          noDataEl.style.display = "block";
+        if (!emails.length) {
+          loadingEl.style.display = 'none';
+          noDataEl.style.display = 'block';
           return;
         }
 
-        const { data: usuarios, error: usuariosError } = await supabase
+        const { data: usuarios } = await supabase
           .from('dadoscetep')
-          .select('nome, email, foto')
+          .select('nome, email, picture')
           .in('email', emails);
 
         const usuarioMap = {};
-        (usuarios || []).forEach(u => {
+        usuarios?.forEach(u => {
           usuarioMap[u.email.toLowerCase()] = u;
         });
 
-        const agendamentosPorUsuario = {};
-        agendamentos.forEach(agenda => {
-          const email = agenda.user_email?.toLowerCase();
+        const grouped = {};
+        agendamentos.forEach(a => {
+          const email = a.user_email?.toLowerCase();
           if (!email) return;
-
-          if (!agendamentosPorUsuario[email]) {
-            agendamentosPorUsuario[email] = {
-              usuario: usuarioMap[email] || { nome: null, email: agenda.user_email, foto: null },
-              agendamentos: []
-            };
-          }
-          agendamentosPorUsuario[email].agendamentos.push(agenda);
+          if (!grouped[email]) grouped[email] = { usuario: usuarioMap[email] || { nome: null, email: a.user_email, picture: null }, agendamentos: [] };
+          grouped[email].agendamentos.push(a);
         });
 
-        Object.values(agendamentosPorUsuario).forEach(({ usuario, agendamentos }) => {
+        usersContainer.innerHTML = '';
+        let index = 0;
+        Object.values(grouped).forEach(({ usuario, agendamentos }) => {
           const card = document.createElement('div');
           card.className = 'user-card';
 
           let agendaHTML = '';
           agendamentos.forEach(a => {
-            const horarios = Array.isArray(a.horario) ? a.horario.join(', ') : (a.horario || '-');
-            const diaFormatado = a.dia ? new Date(a.dia).toLocaleDateString('pt-BR') : '-';
+            const horarios = Array.isArray(a.horario) ? a.horario.join(', ') : (a.horario || '—');
+            const diaFormatado = a.dia ? new Date(a.dia).toLocaleDateString('pt-BR', {
+              weekday: 'short',
+              day: '2-digit',
+              month: '2-digit'
+            }).replace(/\./g, '') : '—';
+
             agendaHTML += `
               <div class="agenda-item">
-                <strong>Lab:</strong> <span>${a.lab_nome || '-'}</span><br>
-                <strong>Dia:</strong> <span>${diaFormatado}</span><br>
-                <strong>Horário:</strong> <span>${horarios}</span><br>
-                <strong>Turno:</strong> <span>${a.turno || '-'}</span>
+                <div class="agenda-row">
+                  <span class="agenda-label">LAB:</span>
+                  <span class="agenda-value">${a.lab_nome || '—'}</span>
+                </div>
+                <div class="agenda-row">
+                  <span class="agenda-label">DIA:</span>
+                  <span class="agenda-value">${diaFormatado}</span>
+                </div>
+                <div class="agenda-row">
+                  <span class="agenda-label">HORÁRIO:</span>
+                  <span class="agenda-value">${horarios}</span>
+                </div>
+                <div class="agenda-row">
+                  <span class="agenda-label">TURNO:</span>
+                  <span class="agenda-value">${getTurnoBadge(a.turno)}</span>
+                </div>
               </div>
             `;
           });
 
-          const nomeExibido = usuario.nome || usuario.email || 'Usuário';
-          const imageUrl = usuario.foto || 'https://via.placeholder.com/72/2563eb/ffffff?text=U';
+          const nomeExibido = usuario.nome || usuario.email || 'USUÁRIO';
+          const imageUrl = usuario.picture || 'https://via.placeholder.com/90/42a5f5/ffffff?text=U';
 
           card.innerHTML = `
-            <img src="${imageUrl}" alt="Foto de ${nomeExibido}" class="user-avatar" onerror="this.src='https://via.placeholder.com/72/2563eb/ffffff?text=U'">
+            <img src="${imageUrl}" alt="Foto de ${nomeExibido}" class="user-avatar" onerror="this.src='https://via.placeholder.com/90/42a5f5/ffffff?text=U'">
             <div class="user-info">
-              <div class="user-name">${nomeExibido}</div>
+              <div class="user-name"><i class="fas fa-user-graduate"></i> ${nomeExibido.toUpperCase()}</div>
               <div class="agenda-list">${agendaHTML}</div>
             </div>
           `;
 
           usersContainer.appendChild(card);
+          setTimeout(() => card.classList.add('visible'), index * 80);
+          index++;
+
+          // Salva referência para busca
+          allUsersData.push({
+            card,
+            nome: nomeExibido,
+            email: usuario.email || ''
+          });
         });
 
-        if (usersContainer.children.length === 0) {
-          noDataEl.style.display = "block";
-        }
+        loadingEl.style.display = 'none';
+        noDataEl.style.display = allUsersData.length === 0 ? 'block' : 'none';
 
       } catch (e) {
-        console.error("Erro crítico:", e);
-        noDataEl.textContent = "Erro ao carregar dados. Verifique o console (F12).";
-        noDataEl.style.display = "block";
+        console.error("Erro:", e);
+        loadingEl.style.display = 'none';
+        noDataEl.textContent = "ERRO AO CARREGAR DADOS.";
+        noDataEl.style.display = 'block';
       }
     }
 
