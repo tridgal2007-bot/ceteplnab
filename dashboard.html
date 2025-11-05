@@ -47,6 +47,32 @@
       align-items: flex-start;
       justify-content: center;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(2px 2px at 20px 30px, #a7ff83, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(167, 255, 131, 0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #66d9ff, transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(102, 217, 255, 0.6), transparent),
+        radial-gradient(2px 2px at 160px 30px, #a7ff83, transparent);
+      background-repeat: repeat;
+      background-size: 200px 100px;
+      animation: sparkle 20s linear infinite;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    @keyframes sparkle {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-100px) rotate(360deg); }
     }
 
     .wrap {
@@ -55,6 +81,18 @@
       grid-template-columns: 360px 1fr;
       gap: 28px;
       align-items: start;
+      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* PROFILE CARD */
@@ -67,6 +105,18 @@
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.04);
+      animation: slideInLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
     .profile-card::before {
@@ -78,41 +128,18 @@
       height: 200%;
       background: radial-gradient(circle, transparent 60%, rgba(167, 255, 131, 0.05) 100%);
       z-index: -1;
+      animation: morph 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes morph {
+      0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+      50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
     }
 
     .avatar-wrap {
       display: flex;
       gap: 20px;
       align-items: center;
-    }
-
-    .avatar-box {
-      width: 100px;
-      height: 100px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid transparent;
-      box-shadow: 0 0 0 2px rgba(167, 255, 131, 0.2), 0 10px 20px rgba(0, 0, 0, 0.4);
-      position: relative;
-      transition: var(--transition);
-      cursor: pointer;
-    }
-
-    .avatar-box:hover {
-      transform: scale(1.03);
-      box-shadow: 0 0 0 3px var(--accent), 0 12px 24px rgba(0, 0, 0, 0.5);
-    }
-
-    .avatar-box img {
-      width: 88px;
-      height: 88px;
-      object-fit: cover;
-      border-radius: 12px;
-      display: block;
-      transition: var(--transition);
     }
 
     .profile-info {
@@ -128,6 +155,22 @@
       color: white;
       letter-spacing: 0.5px;
       line-height: 1.2;
+      position: relative;
+    }
+
+    .profile-name::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.6s ease-out;
+    }
+
+    .profile-info:hover .profile-name::after {
+      width: 100%;
     }
 
     .profile-role {
@@ -135,6 +178,12 @@
       color: var(--muted);
       font-size: 0.95rem;
       letter-spacing: 0.3px;
+      opacity: 0;
+      animation: fadeIn 1s ease-out 0.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
 
     .profile-actions {
@@ -142,6 +191,16 @@
       display: flex;
       gap: 14px;
       flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s forwards;
+    }
+
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .btn {
@@ -164,28 +223,28 @@
       letter-spacing: 0.5px;
     }
 
-    .btn::after {
+    .btn::before {
       content: '';
       position: absolute;
       top: 0;
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
       transition: left 0.6s;
     }
 
-    .btn:hover::after {
+    .btn:hover::before {
       left: 100%;
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(167, 255, 131, 0.4);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(167, 255, 131, 0.4), 0 0 20px rgba(167, 255, 131, 0.2);
     }
 
     .btn:active {
-      transform: translateY(0);
+      transform: translateY(0) scale(0.98);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
@@ -200,33 +259,8 @@
       background: rgba(255,255,255,0.03);
       border-color: var(--accent);
       color: white;
-    }
-
-    .stats {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .stat-item {
-      background: rgba(255,255,255,0.02);
-      padding: 12px;
-      border-radius: 12px;
-      flex: 1;
-      text-align: center;
-      border: 1px solid rgba(255,255,255,0.03);
-    }
-
-    .stat-item .num {
-      font-weight: 700;
-      font-size: 1.15rem;
-      color: var(--accent);
-    }
-
-    .stat-item .label {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 6px;
+      box-shadow: 0 0 20px rgba(167, 255, 131, 0.1);
+      transform: translateY(-2px) scale(1.02);
     }
 
     /* MAIN CARD */
@@ -237,6 +271,18 @@
       padding: 24px;
       box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.04);
+      animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
     .toolbar {
@@ -245,33 +291,8 @@
       justify-content: space-between;
       gap: 16px;
       margin-bottom: 24px;
-    }
-
-    .search {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05);
-      transition: var(--transition);
-    }
-
-    .search:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px var(--accent-glow);
-    }
-
-    .search input {
-      flex: 1;
-      background: transparent;
-      border: 0;
-      outline: 0;
-      color: white;
-      font-size: 0.95rem;
-      font-family: inherit;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 1s forwards;
     }
 
     .cards-grid {
@@ -292,70 +313,123 @@
       transition: var(--transition);
       position: relative;
       overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: staggeredIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    .action-card:nth-child(1) { animation-delay: 1.2s; }
+    .action-card:nth-child(2) { animation-delay: 1.4s; }
+    .action-card:nth-child(3) { animation-delay: 1.6s; }
+
+    @keyframes staggeredIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .action-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .action-card:hover::before {
+      opacity: 1;
     }
 
     .action-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(167, 255, 131, 0.2);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(167, 255, 131, 0.3);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(167, 255, 131, 0.15);
     }
 
     .action-card .title {
       font-size: 1.1rem;
       color: white;
       letter-spacing: 0.4px;
+      position: relative;
+      z-index: 1;
     }
 
     .action-card .desc {
       color: var(--muted);
       font-size: 0.9rem;
       line-height: 1.4;
+      z-index: 1;
     }
 
     .animated-cta {
       display: flex;
       gap: 16px;
       align-items: center;
+      position: relative;
+      z-index: 1;
     }
 
     .animated-cta .thumb {
-      width: 84px;
-      height: 84px;
+      width: 100px;
+      height: 100px;
       border-radius: 12px;
-      flex: 0 0 84px;
+      flex: 0 0 100px;
       overflow: hidden;
       border: 2px solid rgba(255,255,255,0.06);
       background: rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+    }
+
+    .animated-cta .thumb::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, var(--accent-glow), transparent 30%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      animation: rotate 4s linear infinite paused;
+    }
+
+    .animated-cta:hover .thumb::after {
+      opacity: 1;
+      animation-play-state: running;
+    }
+
+    @keyframes rotate {
+      to { transform: rotate(360deg); }
     }
 
     .animated-cta img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      transition: filter 0.3s ease;
+      padding: 8px;
     }
 
-    .footer-note {
-      margin-top: 24px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      text-align: center;
-      opacity: 0.9;
+    .action-card:hover .animated-cta img {
+      filter: drop-shadow(0 0 15px var(--accent-glow)) brightness(1.1);
     }
 
-    /* PARTICLE EFFECT */
-    .particle {
-      position: fixed;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 10000;
-      mix-blend-mode: screen;
-      opacity: 0;
+    .btn.big-btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: auto;
+      font-size: 0.95rem;
+      padding: 14px;
     }
 
     /* RESPONSIVE */
@@ -400,9 +474,8 @@
     }
 
     @media (max-width: 420px) {
-      .avatar-box { width: 88px; height: 88px; }
-      .avatar-box img { width: 76px; height: 76px; }
-      .animated-cta .thumb { width: 70px; height: 70px; }
+      .animated-cta .thumb { width: 80px; height: 80px; flex: 0 0 80px; }
+      .animated-cta img { padding: 4px; }
       .profile-name { font-size: 1.15rem; }
       .btn { padding: 12px; font-size: 0.95rem; }
     }
@@ -422,9 +495,6 @@
   <div class="wrap">
     <aside class="profile-card" aria-label="Informações do usuário">
       <div class="avatar-wrap">
-        <div class="avatar-box" id="avatarBox" title="Clique para celebrar">
-          <img id="userPicture" src="imagen/default.png" alt="Foto do usuário">
-        </div>
         <div class="profile-info">
           <div class="profile-name" id="userNick">Carregando...</div>
           <div class="profile-role" id="userRole">—</div>
@@ -432,29 +502,13 @@
       </div>
 
       <div class="profile-actions">
-        <button class="btn" id="openCalendar">Abrir Agenda</button>
         <button class="btn ghost" id="editProfile">Editar Perfil</button>
-      </div>
-
-      <div class="stats" aria-hidden="true">
-        <div class="stat-item"><div class="num">12</div><div class="label">Agendamentos</div></div>
-        <div class="stat-item"><div class="num">3</div><div class="label">Alertas</div></div>
       </div>
     </aside>
 
     <main class="main-card">
       <div class="toolbar">
-        <div class="search" role="search">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M21 21l-4.35-4.35" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"></path>
-            <circle cx="11" cy="11" r="5" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"></circle>
-          </svg>
-          <input id="searchInput" type="search" placeholder="Buscar agendamentos, laboratórios ou pessoas…" aria-label="Buscar">
-        </div>
-        <div style="display:flex;gap:12px;align-items:center; width: 100%;">
-          <button class="btn ghost" id="refreshBtn" style="flex:1;">Atualizar</button>
-          <button class="btn" id="newBtn" style="flex:1;">+ Novo</button>
-        </div>
+        <button class="btn ghost" id="refreshBtn" style="margin-left:auto;">Atualizar</button>
       </div>
 
       <div class="cards-grid">
@@ -491,8 +545,6 @@
           <button class="btn big-btn" onclick="location.href='minha-agenda.html'">Ver Minha Agenda</button>
         </section>
       </div>
-
-      <div class="footer-note">Dica: clique na foto para celebrar ✨</div>
     </main>
   </div>
 
@@ -514,36 +566,6 @@
       }
     }
 
-    function createParticles(x, y, count = 14) {
-      const colors = ['#a7ff83', '#66d9ff', '#b8ffcf'];
-      for (let i = 0; i < count; i++) {
-        const el = document.createElement('div');
-        el.className = 'particle';
-        el.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
-        el.style.top = (y + (Math.random() - 0.5) * 20) + 'px';
-        el.style.background = colors[Math.floor(Math.random() * colors.length)];
-        document.body.appendChild(el);
-
-        const dur = 800 + Math.random() * 600;
-        const dx = (Math.random() - 0.5) * 140;
-        const dy = -50 - Math.random() * 160;
-        const start = performance.now();
-
-        function tick(now) {
-          const t = (now - start) / dur;
-          if (t >= 1) {
-            el.remove();
-            return;
-          }
-          const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-          el.style.opacity = String(1 - t);
-          el.style.transform = `translate(${dx * ease}px, ${dy * ease}px) scale(${0.8 + 0.4 * t})`;
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      }
-    }
-
     async function init() {
       let email = localStorage.getItem('userEmail');
       if (!email) {
@@ -561,7 +583,7 @@
       try {
         const { data, error } = await supabase
           .from('dadoscetep')
-          .select('nome, classe, email, nick, picture')
+          .select('nome, classe, email, nick')
           .eq('email', email)
           .single();
 
@@ -569,17 +591,10 @@
 
         document.getElementById('userNick').textContent = data.nome || data.nick || 'Usuário';
         document.getElementById('userRole').textContent = data.classe || '—';
-        document.getElementById('userPicture').src = data.picture || 'imagen/default.png';
         localStorage.setItem('userData', JSON.stringify(data));
       } catch (err) {
         console.error('Falha ao carregar dados:', err);
       }
-
-      // Avatar click
-      document.getElementById('avatarBox').addEventListener('click', (e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        createParticles(r.left + r.width / 2, r.top + r.height / 2);
-      });
 
       // Frame animation
       const frameImages = ['frame3.png','frame1.png','frame6.png','frame2.png','frame4.png','frame5.png'];
@@ -596,8 +611,6 @@
       const nav = (url) => () => location.href = url;
       document.getElementById('agendadosBtn').addEventListener('click', nav('agendados.html'));
       document.getElementById('openGlobal').addEventListener('click', nav('agendados.html'));
-      document.getElementById('openCalendar').addEventListener('click', nav('agendar.html'));
-      document.getElementById('newBtn').addEventListener('click', nav('agendar.html'));
       document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
     }
 

@@ -2,140 +2,308 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Meus Agendamentos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meus Agendamentos — Minha Agenda</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+
   <style>
-    /* Fonte Jersey 15 - coloque o arquivo Jersey.woff2 em ./fonts/ ou ajuste o caminho */
-    @font-face {
-      font-family: 'Jersey';
-      src: url('./fonts/Jersey.woff2') format('woff2');
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: swap;
+    :root {
+      --bg-a: #0b1225;
+      --bg-b: #060f2b;
+      --card: rgba(15, 23, 42, 0.6);
+      --glass: rgba(255, 255, 255, 0.05);
+      --muted: rgba(230, 238, 248, 0.75);
+      --accent: #a7ff83;
+      --accent-2: #66d9ff;
+      --accent-glow: rgba(167, 255, 131, 0.3);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      font-size: 16px;
     }
 
-    :root{
-      --bg-1: #eef2ff;
-      --bg-2: #f8fafc;
-      --primary: #2563eb;
-      --primary-700: #1e40af;
-      --muted: #6b7280;
-      --card-shadow: 0 8px 30px rgba(16,24,40,0.08);
-      --radius: 14px;
-      --ui-font-size: 15px; /* Jersey 15 */
-      --max-w: 1024px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: 'Jersey', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-      font-size:var(--ui-font-size);
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(37,99,235,0.06), transparent 12%), linear-gradient(180deg,var(--bg-1),var(--bg-2));
-      color:#0f1724;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      display:flex;
-      justify-content:center;
-      padding:28px 16px;
+    html, body {
+      height: 100%;
     }
 
-    .stage{ width:100%; max-width:var(--max-w); }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:18px 20px;
-      border-radius:calc(var(--radius) + 4px);
-      background: linear-gradient(90deg,var(--primary),var(--primary-700));
-      color:#fff;
-      box-shadow:0 10px 30px rgba(30,64,175,0.12);
-    }
-    header .title{display:flex;align-items:center;gap:12px}
-    header h1{margin:0;font-size:1.05rem;font-weight:800}
-
-    main{margin-top:18px}
-
-    .panel{
-      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.55));
-      backdrop-filter: blur(6px) saturate(120%);
-      -webkit-backdrop-filter: blur(6px) saturate(120%);
-      border-radius:var(--radius);
-      padding:18px;
-      box-shadow:var(--card-shadow);
-      border:1px solid rgba(16,24,40,0.04);
+    body {
+      font-family: 'Jersey 15', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at 10% 20%, rgba(102, 217, 255, 0.04), transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(167, 255, 131, 0.03), transparent 50%),
+                  linear-gradient(145deg, var(--bg-a), var(--bg-b));
+      color: #e6eef8;
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-x: hidden;
     }
 
-    #agendaContainer{
-      display:grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap:14px;
+    .stage {
+      width: min(1120px, 96%);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      align-items: center;
     }
 
-    @media (max-width:720px){
-      #agendaContainer{grid-template-columns: 1fr}
+    /* HEADER */
+    header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 24px;
+      border-radius: var(--radius);
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      color: white;
+      position: relative;
+      overflow: hidden;
     }
 
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,252,0.98));
-      padding:12px 14px;
-      border-radius:12px;
-      box-shadow:0 6px 20px rgba(16,24,40,0.06);
-      transition: transform .18s ease, box-shadow .18s ease;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:96px;
-      border:1px solid rgba(16,24,40,0.03);
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, transparent 60%, rgba(167, 255, 131, 0.05) 100%);
+      z-index: -1;
     }
-    .card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(16,24,40,0.09)}
 
-    .card-head{display:flex;align-items:center;gap:10px}
-    .icon-wrap{width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,rgba(37,99,235,0.12),rgba(29,78,216,0.06));display:flex;align-items:center;justify-content:center}
-    .lab-name{font-weight:800;color:var(--primary);font-size:0.98rem}
+    header .title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-    .meta-row{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:0.95rem}
-    .pill{background:rgba(37,99,235,0.08);color:var(--primary);padding:6px 10px;border-radius:999px;font-weight:700;font-size:0.88rem}
+    header h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: white;
+    }
 
-    .email{margin-top:auto;font-size:0.86rem;color:var(--muted);word-break:break-all}
+    /* MAIN PANEL */
+    main {
+      width: 100%;
+    }
 
-    .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:26px 10px;font-weight:600}
+    .panel {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.04);
+      position: relative;
+      overflow: hidden;
+    }
 
-    .logout-btn{
-      background:transparent;border:2px solid rgba(37,99,235,0.12);color:var(--primary);padding:8px 14px;border-radius:10px;font-weight:800;cursor:pointer;transition:all .12s ease}
-    .logout-btn:hover{background:rgba(37,99,235,0.06);transform:translateY(-3px)}
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, transparent 60%, rgba(102, 217, 255, 0.03) 100%);
+      z-index: -1;
+    }
 
-    .hint{margin-top:10px;color:var(--muted);font-size:0.85rem;text-align:center}
+    #agenda-title {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    #agendaContainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 880px) {
+      #agendaContainer {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.015);
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 120px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(167, 255, 131, 0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent-glow);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(167, 255, 131, 0.1), rgba(102, 217, 255, 0.05));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .icon-wrap svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+    }
+
+    .lab-name {
+      font-weight: 700;
+      color: white;
+      font-size: 1.05rem;
+      letter-spacing: 0.3px;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .pill {
+      background: rgba(167, 255, 131, 0.1);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid var(--accent-glow);
+    }
+
+    .email {
+      margin-top: auto;
+      font-size: 0.85rem;
+      color: var(--muted);
+      word-break: break-all;
+      opacity: 0.8;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .hint {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 880px) {
+      body { padding: 16px; }
+      .stage { gap: 20px; }
+      header { padding: 16px 20px; }
+      .panel { padding: 20px; }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 16px; min-height: 100px; }
+      .icon-wrap { width: 40px; height: 40px; }
+      .lab-name { font-size: 1rem; }
+    }
+
+    /* FOCUS STYLES FOR ACCESSIBILITY */
+    .card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
   <div class="stage">
-    <header>
+    <header aria-label="Cabeçalho da página">
       <div class="title">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-          <path d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <h1>Meus Agendamentos</h1>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="font-weight:700;font-size:0.9rem;opacity:0.95">Bem-vindo</div>
-        <button class="logout-btn" onclick="logout()">Sair</button>
-      </div>
     </header>
 
-    <main style="margin-top:16px">
+    <main>
       <section class="panel" aria-labelledby="agenda-title">
-        <div id="agenda-title" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Lista de agendamentos</div>
+        <div id="agenda-title" style="position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;">Lista de agendamentos</div>
 
         <div id="agendaContainer" aria-live="polite">
           <p class="empty">Carregando seus agendamentos...</p>
         </div>
 
-        <div class="hint">Agendamentos carregados a partir da sua conta. Use Sair para encerrar sessão.</div>
+        <div class="hint">Agendamentos carregados a partir da sua conta.</div>
       </section>
     </main>
   </div>
@@ -143,48 +311,73 @@
   <script>
     const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = window.supabase.createClient(supabaseUrl.trim(), supabaseAnonKey.trim());
 
     const userEmail = localStorage.getItem("userEmail");
     const container = document.getElementById("agendaContainer");
 
-    function escapeHtml(text){
+    function parseJwt(token) {
+      try {
+        if (!token) return null;
+        const parts = token.split('.');
+        if (parts.length < 2) return null;
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function escapeHtml(text) {
       if (text === null || text === undefined) return '';
-      return String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
+      return String(text).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", "&#39;");
     }
 
     // formata dia (assume formato YYYY-MM-DD ou já uma string legível)
-    function formatDia(raw){
+    function formatDia(raw) {
       if (!raw) return '—';
       const iso = /^\d{4}-\d{2}-\d{2}$/;
-      if (iso.test(raw)){
-        try{
+      if (iso.test(raw)) {
+        try {
           const d = new Date(raw + 'T00:00:00');
-          return d.toLocaleDateString('pt-BR', { weekday: 'short', day:'2-digit', month:'short' });
-        }catch(e){return raw}
+          return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+        } catch (e) { return raw; }
       }
       return raw;
     }
 
-    async function carregarAgendamentos(){
-      if (!userEmail){
+    async function init() {
+      let email = userEmail;
+
+      if (!email) {
+        const token = localStorage.getItem('googleToken');
+        const payload = parseJwt(token);
+        if (payload?.email) email = payload.email;
+      }
+
+      if (!email) {
         container.innerHTML = `<p class="empty">❌ Nenhum usuário logado. Faça login novamente.</p>`;
         return;
       }
 
+      await carregarAgendamentos();
+    }
+
+    async function carregarAgendamentos() {
       const { data, error } = await supabase
         .from('agendamentos')
         .select('*')
         .eq('user_email', userEmail)
         .order('dia', { ascending: true });
 
-      if (error){
+      if (error) {
         console.error(error);
-        container.innerHTML = `<p class="empty">Erro ao carregar agendamentos.</p>`;
+        container.innerHTML = `<p class="empty">Erro ao carregar agendamentos: ${escapeHtml(error.message)}</p>`;
         return;
       }
 
-      if (!data || data.length === 0){
+      if (!data || data.length === 0) {
         container.innerHTML = `<p class="empty">📭 Você ainda não possui agendamentos.</p>`;
         return;
       }
@@ -196,14 +389,19 @@
         const email = escapeHtml(item.user_email || '—');
 
         return `
-          <article class="card" aria-label="Agendamento de ${lab}">
+          <article class="card" aria-label="Agendamento de ${lab}" tabindex="0">
             <div class="card-head">
-              <div class="icon-wrap" aria-hidden>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div class="icon-wrap" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </div>
               <div>
                 <div class="lab-name">${lab}</div>
-                <div class="meta-row"><span class="pill">${dia}</span><span>${horario}</span></div>
+                <div class="meta-row">
+                  <span class="pill">${dia}</span>
+                  <span>${horario}</span>
+                </div>
               </div>
             </div>
             <div class="email">${email}</div>
@@ -212,12 +410,7 @@
       }).join('');
     }
 
-    function logout(){
-      localStorage.clear();
-      window.location.href = 'index.html';
-    }
-
-    carregarAgendamentos();
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
