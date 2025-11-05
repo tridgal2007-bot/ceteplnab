@@ -439,18 +439,18 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.4);
       z-index: 1000;
       display: none;
-      align-items: center;
-      justify-content: center;
     }
 
     .tutorial-container {
+      position: fixed;
+      z-index: 1001;
       background: var(--card);
       border-radius: var(--radius);
       padding: 24px;
-      max-width: 600px;
+      max-width: 500px;
       max-height: 80vh;
       overflow-y: auto;
       border: 1px solid rgba(255, 255, 255, 0.04);
@@ -458,6 +458,9 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
 
     .guide-character {
@@ -537,19 +540,32 @@
     .highlight-target::after {
       content: '';
       position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
       background: linear-gradient(45deg, var(--accent), var(--accent-2));
       border-radius: inherit;
-      animation: pulse 2s infinite;
+      animation: pulse 1.5s infinite;
       z-index: -1;
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 0.5; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.05); }
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+
+    .tutorial-pointer {
+      position: fixed;
+      z-index: 1002;
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 12px solid var(--accent);
+      display: none;
+      pointer-events: none;
     }
 
     /* RESPONSIVE */
@@ -593,8 +609,10 @@
       }
 
       .tutorial-container {
-        margin: 16px;
         max-width: calc(100% - 32px);
+        left: 16px !important;
+        top: 16px !important;
+        transform: none !important;
       }
     }
 
@@ -674,20 +692,22 @@
     </main>
   </div>
 
+  <!-- Tutorial Pointer -->
+  <div id="tutorial-pointer" class="tutorial-pointer"></div>
+
   <!-- Tutorial Overlay -->
   <div class="tutorial-overlay" id="tutorialOverlay">
     <div class="tutorial-container">
       <div class="guide-character">
         <img src="imagen/tutorial-woman.gif" alt="Guia de tutorial" id="guide-gif">
         <div class="speech-bubble" id="speechBubble">
-          <p id="tutorialMessage">Olá usuário, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.</p>
+          <p id="tutorialMessage"></p>
         </div>
       </div>
       <div class="tutorial-controls">
         <span class="tutorial-step-indicator" id="stepIndicator">Passo 1 de 6</span>
         <button class="btn ghost" id="prevStep" style="display: none;">Anterior</button>
         <button class="btn" id="nextStep">Próximo</button>
-        <button class="btn ghost" id="skipTutorial">Pular Tutorial</button>
       </div>
     </div>
   </div>
@@ -697,19 +717,17 @@
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
     const supabase = window.supabase.createClient(supabaseUrl.trim(), supabaseAnonKey.trim());
 
+    let userName = 'Usuário';
+
     // Tutorial Logic
-    const tutorialSteps = [
+    const baseTutorialSteps = [
       {
         target: null,
-        message: 'Olá usuário, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.'
+        message: 'Olá {{userName}}, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.'
       },
       {
         target: '#editProfile',
         message: 'Aqui você pode editar seu perfil para personalizar suas informações, como nome e apelido.'
-      },
-      {
-        target: '#refreshBtn',
-        message: 'O botão "Atualizar" recarrega a página para ver as últimas mudanças nos agendamentos.'
       },
       {
         target: '[onclick="location.href=\'agendar.html\'"]',
@@ -722,13 +740,23 @@
       {
         target: '[onclick="location.href=\'minha-agenda.html\'"]',
         message: '"Ver Minha Agenda" exibe apenas seus agendamentos pessoais com ações rápidas para gerenciar.'
+      },
+      {
+        target: null,
+        message: 'Foi um prazer te guiar nessa jornada inicial, {{userName}}! Eu sou Ayda e nos encontraremos mais vezes aqui na plataforma sempre que precisar de ajuda adicional.'
       }
     ];
 
+    let tutorialSteps = [...baseTutorialSteps];
     let currentStep = 0;
 
     function startTutorial() {
-      document.getElementById('tutorialOverlay').style.display = 'flex';
+      // Personalize messages
+      tutorialSteps = baseTutorialSteps.map(step => ({
+        ...step,
+        message: step.message.replace('{{userName}}', userName)
+      }));
+      document.getElementById('tutorialOverlay').style.display = 'block';
       updateStep();
     }
 
@@ -738,6 +766,8 @@
       const indicatorEl = document.getElementById('stepIndicator');
       const prevBtn = document.getElementById('prevStep');
       const nextBtn = document.getElementById('nextStep');
+      const container = document.querySelector('.tutorial-container');
+      const pointer = document.getElementById('tutorial-pointer');
 
       messageEl.textContent = step.message;
       indicatorEl.textContent = `Passo ${currentStep + 1} de ${tutorialSteps.length}`;
@@ -747,11 +777,39 @@
         el.classList.remove('highlight-target');
       });
 
-      // Add highlight to current target
       const targetEl = document.querySelector(step.target);
       if (targetEl) {
         targetEl.classList.add('highlight-target');
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Position pointer
+        const rect = targetEl.getBoundingClientRect();
+        pointer.style.left = (rect.left + rect.width / 2) + 'px';
+        pointer.style.top = (rect.top - 12) + 'px';
+        pointer.style.display = 'block';
+        pointer.style.transform = 'translateX(-50%)';
+
+        // Position container to the right or left of target
+        let left = rect.right + 20;
+        let top = rect.top;
+        const containerWidth = 500;
+        const vw = window.innerWidth;
+
+        if (left + containerWidth > vw) {
+          left = Math.max(20, rect.left - containerWidth - 20);
+        }
+        if (top < 20) top = 20;
+        if (top + 300 > window.innerHeight) top = window.innerHeight - 320; // adjust height approx
+
+        container.style.left = left + 'px';
+        container.style.top = top + 'px';
+        container.style.transform = 'none';
+      } else {
+        // Center for intro and farewell
+        pointer.style.display = 'none';
+        container.style.left = '50%';
+        container.style.top = '50%';
+        container.style.transform = 'translate(-50%, -50%)';
       }
 
       prevBtn.style.display = currentStep > 0 ? 'inline-flex' : 'none';
@@ -776,6 +834,7 @@
 
     function endTutorial() {
       document.getElementById('tutorialOverlay').style.display = 'none';
+      document.getElementById('tutorial-pointer').style.display = 'none';
       // Remove all highlights
       document.querySelectorAll('.highlight-target').forEach(el => {
         el.classList.remove('highlight-target');
@@ -788,9 +847,10 @@
     }
 
     // Event listeners for tutorial
-    document.getElementById('nextStep').addEventListener('click', nextStep);
-    document.getElementById('prevStep').addEventListener('click', prevStep);
-    document.getElementById('skipTutorial').addEventListener('click', endTutorial);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nextStep').addEventListener('click', nextStep);
+      document.getElementById('prevStep').addEventListener('click', prevStep);
+    });
 
     function parseJwt(token) {
       try {
@@ -816,6 +876,7 @@
       if (!email) {
         document.getElementById('userNick').textContent = 'Convidado';
         document.getElementById('userRole').textContent = 'Faça login para acessar';
+        userName = 'Convidado';
         initTutorial();
         return;
       }
@@ -829,9 +890,11 @@
 
         if (error) throw error;
 
-        document.getElementById('userNick').textContent = data.nome || data.nick || 'Usuário';
+        const displayName = data.nome || data.nick || 'Usuário';
+        document.getElementById('userNick').textContent = displayName;
         document.getElementById('userRole').textContent = data.classe || '—';
         localStorage.setItem('userData', JSON.stringify(data));
+        userName = displayName;
       } catch (err) {
         console.error('Falha ao carregar dados:', err);
         document.getElementById('userRole').textContent = 'Erro ao carregar';
