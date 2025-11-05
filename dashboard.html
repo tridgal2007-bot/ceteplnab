@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Minha Agenda — Dashboard</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com  ">
+  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
 
   <style>
@@ -432,6 +432,126 @@
       padding: 14px;
     }
 
+    /* TUTORIAL STYLES */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tutorial-container {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .guide-character {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    #guide-gif {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .speech-bubble {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 16px;
+      color: #e6eef8;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 400px;
+      margin-left: -8px;
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      left: -16px;
+      top: 20px;
+      width: 0;
+      height: 0;
+      border: 8px solid transparent;
+      border-right-color: rgba(255, 255, 255, 0.1);
+      z-index: -1;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 20px;
+      width: 0;
+      height: 0;
+      border: 8px solid transparent;
+      border-right-color: var(--glass);
+      z-index: 1;
+    }
+
+    .tutorial-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .tutorial-step-indicator {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .highlight-target {
+      position: relative;
+      z-index: 999;
+    }
+
+    .highlight-target::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent), var(--accent-2));
+      border-radius: inherit;
+      animation: pulse 2s infinite;
+      z-index: -1;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
     /* RESPONSIVE */
     @media (max-width: 880px) {
       body { padding: 16px; }
@@ -471,6 +591,11 @@
       .cards-grid {
         grid-template-columns: 1fr;
       }
+
+      .tutorial-container {
+        margin: 16px;
+        max-width: calc(100% - 32px);
+      }
     }
 
     @media (max-width: 420px) {
@@ -478,6 +603,7 @@
       .animated-cta img { padding: 4px; }
       .profile-name { font-size: 1.15rem; }
       .btn { padding: 12px; font-size: 0.95rem; }
+      #guide-gif { width: 100px; height: 100px; }
     }
 
     /* FOCUS STYLES FOR ACCESSIBILITY */
@@ -488,7 +614,7 @@
     }
   </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="  https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2  "></script>
 </head>
 
 <body>
@@ -548,10 +674,123 @@
     </main>
   </div>
 
+  <!-- Tutorial Overlay -->
+  <div class="tutorial-overlay" id="tutorialOverlay">
+    <div class="tutorial-container">
+      <div class="guide-character">
+        <img src="imagen/tutorial-woman.gif" alt="Guia de tutorial" id="guide-gif">
+        <div class="speech-bubble" id="speechBubble">
+          <p id="tutorialMessage">Olá usuário, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.</p>
+        </div>
+      </div>
+      <div class="tutorial-controls">
+        <span class="tutorial-step-indicator" id="stepIndicator">Passo 1 de 6</span>
+        <button class="btn ghost" id="prevStep" style="display: none;">Anterior</button>
+        <button class="btn" id="nextStep">Próximo</button>
+        <button class="btn ghost" id="skipTutorial">Pular Tutorial</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
+    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co  ';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
     const supabase = window.supabase.createClient(supabaseUrl.trim(), supabaseAnonKey.trim());
+
+    // Tutorial Logic
+    const tutorialSteps = [
+      {
+        target: null,
+        message: 'Olá usuário, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.'
+      },
+      {
+        target: '#editProfile',
+        message: 'Aqui você pode editar seu perfil para personalizar suas informações, como nome e apelido.'
+      },
+      {
+        target: '#refreshBtn',
+        message: 'O botão "Atualizar" recarrega a página para ver as últimas mudanças nos agendamentos.'
+      },
+      {
+        target: '[onclick="location.href=\'agendar.html\'"]',
+        message: 'Clique em "Ir para Agendamento" para agendar laboratórios e salas rapidamente com sugestões inteligentes.'
+      },
+      {
+        target: '#openGlobal',
+        message: '"Abrir Agenda Global" mostra todos os agendamentos de todos os usuários em tempo real.'
+      },
+      {
+        target: '[onclick="location.href=\'minha-agenda.html\'"]',
+        message: '"Ver Minha Agenda" exibe apenas seus agendamentos pessoais com ações rápidas para gerenciar.'
+      }
+    ];
+
+    let currentStep = 0;
+
+    function startTutorial() {
+      document.getElementById('tutorialOverlay').style.display = 'flex';
+      updateStep();
+    }
+
+    function updateStep() {
+      const step = tutorialSteps[currentStep];
+      const messageEl = document.getElementById('tutorialMessage');
+      const indicatorEl = document.getElementById('stepIndicator');
+      const prevBtn = document.getElementById('prevStep');
+      const nextBtn = document.getElementById('nextStep');
+
+      messageEl.textContent = step.message;
+      indicatorEl.textContent = `Passo ${currentStep + 1} de ${tutorialSteps.length}`;
+
+      // Remove previous highlight
+      document.querySelectorAll('.highlight-target').forEach(el => {
+        el.classList.remove('highlight-target');
+      });
+
+      // Add highlight to current target
+      const targetEl = document.querySelector(step.target);
+      if (targetEl) {
+        targetEl.classList.add('highlight-target');
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      prevBtn.style.display = currentStep > 0 ? 'inline-flex' : 'none';
+      nextBtn.textContent = currentStep === tutorialSteps.length - 1 ? 'Concluir' : 'Próximo';
+    }
+
+    function nextStep() {
+      if (currentStep < tutorialSteps.length - 1) {
+        currentStep++;
+      } else {
+        endTutorial();
+      }
+      updateStep();
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        updateStep();
+      }
+    }
+
+    function endTutorial() {
+      document.getElementById('tutorialOverlay').style.display = 'none';
+      // Remove all highlights
+      document.querySelectorAll('.highlight-target').forEach(el => {
+        el.classList.remove('highlight-target');
+      });
+    }
+
+    function initTutorial() {
+      // Always start tutorial
+      setTimeout(startTutorial, 500);
+    }
+
+    // Event listeners for tutorial
+    document.getElementById('nextStep').addEventListener('click', nextStep);
+    document.getElementById('prevStep').addEventListener('click', prevStep);
+    document.getElementById('skipTutorial').addEventListener('click', endTutorial);
 
     function parseJwt(token) {
       try {
@@ -577,6 +816,7 @@
       if (!email) {
         document.getElementById('userNick').textContent = 'Convidado';
         document.getElementById('userRole').textContent = 'Faça login para acessar';
+        initTutorial();
         return;
       }
 
@@ -594,6 +834,7 @@
         localStorage.setItem('userData', JSON.stringify(data));
       } catch (err) {
         console.error('Falha ao carregar dados:', err);
+        document.getElementById('userRole').textContent = 'Erro ao carregar';
       }
 
       // Frame animation
@@ -612,6 +853,9 @@
       document.getElementById('agendadosBtn').addEventListener('click', nav('agendados.html'));
       document.getElementById('openGlobal').addEventListener('click', nav('agendados.html'));
       document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
+
+      // Init tutorial after DOM and data load
+      initTutorial();
     }
 
     document.addEventListener('DOMContentLoaded', init);
