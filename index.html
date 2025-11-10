@@ -186,6 +186,65 @@
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+    // Adicione esta função para verificar se o usuário já está logado
+    async function checkIfLoggedIn() {
+      const token = localStorage.getItem('googleToken');
+      const email = localStorage.getItem('userEmail');
+
+      if (token && email) {
+        try {
+          // Verifica se o usuário existe no Supabase (opcional, mas recomendado para validar)
+          const { data: existing, error: selectError } = await supabase
+            .from('dadoscetep')
+            .select('id')
+            .eq('email', email)
+            .limit(1);
+
+          if (selectError) throw selectError;
+          const exists = Array.isArray(existing) && existing.length > 0;
+
+          if (exists) {
+            // Atualiza o último login se necessário
+            await supabase.from('dadoscetep')
+              .update({
+                ultimo_login: new Date().toISOString()
+              })
+              .eq('email', email);
+
+            window.location.href = "dashboard.html";
+            return true;
+          } else {
+            // Se não existir, limpa o localStorage e mantém na página de login
+            localStorage.removeItem('googleToken');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+          }
+        } catch (err) {
+          console.error('Erro ao verificar login:', err);
+          // Limpa o localStorage em caso de erro (token inválido, etc.)
+          localStorage.removeItem('googleToken');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+        }
+      }
+      return false;
+    }
+
+    // Chama a verificação ao carregar a página
+    window.addEventListener('load', async () => {
+      const isLoggedIn = await checkIfLoggedIn();
+      if (isLoggedIn) {
+        // Redireciona já foi feito na função
+      } else {
+        // Inicializa o Google Sign-In se não estiver logado
+        google.accounts.id.initialize({
+          client_id: '240571935743-6vdr0p8b7l3esqk940i514uoqmepa8e1.apps.googleusercontent.com',
+          callback: handleCredentialResponse,
+          auto_prompt: false
+        });
+      }
+    });
+
     async function handleCredentialResponse(response) {
       try {
         if (!response?.credential) throw new Error('Token inválido');
