@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Agendamentos • GLOBAL</title>
 
-  <!-- Fonte Jersey 15 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
@@ -15,43 +14,77 @@
 
   <style>
     :root {
-      --jersey-font: 'Jersey 15', system-ui, sans-serif;
-      --bg-light: #f0f9ff;
-      --bg-gradient: linear-gradient(135deg, #e0f7fa 0%, #bbdefb 100%);
-      --card-bg: white;
-      --text-primary: #0d47a1;
-      --text-secondary: #42a5f5;
-      --border-radius: 20px;
-      --shadow: 0 8px 30px rgba(13, 71, 161, 0.12);
-      --shadow-hover: 0 12px 40px rgba(13, 71, 161, 0.2);
-      --transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg-gradient: linear-gradient(135deg, #0c1a2b 0%, #1a2d45 100%);
-        --card-bg: #121f33;
-        --text-primary: #60a5fa;
-        --text-secondary: #93c5fd;
-        --bg-light: #0f1b2b;
-      }
+      --bg-a: #0f172a;
+      --bg-b: #1e293b;
+      --card: rgba(15, 23, 42, 0.85);
+      --glass: rgba(255, 255, 255, 0.08);
+      --muted: rgba(230, 238, 248, 0.8);
+      --accent: #60a5fa;
+      --accent-2: #3b82f6;
+      --accent-glow: rgba(96, 165, 250, 0.4);
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      --radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --pixel-size: 4px;
+      font-size: 16px;
     }
 
     * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
     }
 
     body {
-      font-family: system-ui, sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-primary);
+      font-family: 'Jersey 15', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-a);
+      color: #e6eef8;
       min-height: 100vh;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      position: relative;
+      image-rendering: pixelated;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(96, 165, 250, 0.05) 2px, rgba(96, 165, 250, 0.05) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59, 130, 246, 0.05) 2px, rgba(59, 130, 246, 0.05) 4px),
+        linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 100%);
+      z-index: -2;
+      animation: grid-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes grid-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.02); }
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(96, 165, 250, 0.15) 0%, transparent 70%);
+      mix-blend-mode: overlay;
+      z-index: -1;
+      animation: nebula-flow 20s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes nebula-flow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
     }
 
     .header {
@@ -59,22 +92,23 @@
       margin-bottom: 24px;
       max-width: 800px;
       padding: 0 12px;
+      width: 100%;
     }
 
     .header h1 {
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       font-size: clamp(2.2rem, 6vw, 3.4rem);
       letter-spacing: 1.2px;
-      color: var(--text-primary);
+      color: white;
       text-shadow: 0 2px 6px rgba(0,0,0,0.08);
       margin-bottom: 12px;
       line-height: 1.1;
     }
 
     .header p {
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       font-size: clamp(1.1rem, 4vw, 1.4rem);
-      color: var(--text-secondary);
+      color: var(--muted);
       letter-spacing: 1px;
       opacity: 0.9;
     }
@@ -90,19 +124,19 @@
     .search-input {
       width: 100%;
       padding: 16px 20px 16px 52px;
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       font-size: 1.2rem;
       border: none;
       border-radius: 50px;
-      background: var(--card-bg);
-      color: var(--text-primary);
+      background: var(--card);
+      color: white;
       box-shadow: var(--shadow);
       outline: none;
       transition: var(--transition);
     }
 
     .search-input:focus {
-      box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.4), var(--shadow-hover);
+      box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-hover);
     }
 
     .search-icon {
@@ -110,7 +144,7 @@
       left: 20px;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-secondary);
+      color: var(--accent);
       font-size: 1.4rem;
     }
 
@@ -121,7 +155,7 @@
       transform: translateY(-50%);
       background: none;
       border: none;
-      color: var(--text-secondary);
+      color: var(--accent);
       font-size: 1.2rem;
       cursor: pointer;
       opacity: 0;
@@ -144,8 +178,8 @@
     }
 
     .user-card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
+      background: var(--card);
+      border-radius: var(--radius);
       padding: 22px;
       box-shadow: var(--shadow);
       display: flex;
@@ -155,6 +189,7 @@
       opacity: 0;
       transform: translateY(20px);
       will-change: transform, opacity;
+      border: var(--pixel-size) solid rgba(255, 255, 255, 0.04);
     }
 
     .user-card.visible {
@@ -176,7 +211,7 @@
       height: 70px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid var(--text-secondary);
+      border: 3px solid var(--accent);
       flex-shrink: 0;
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
@@ -187,9 +222,9 @@
     }
 
     .user-name {
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       font-size: clamp(1.4rem, 5vw, 1.8rem);
-      color: var(--text-primary);
+      color: white;
       margin-bottom: 20px;
       display: flex;
       align-items: center;
@@ -203,72 +238,62 @@
     }
 
     .agenda-item {
-      background: var(--bg-light);
+      background: var(--glass);
       padding: 18px;
       border-radius: 16px;
-      border-left: 4px solid var(--text-secondary);
+      border-left: 4px solid var(--accent);
     }
 
     .agenda-row {
       display: flex;
       margin-bottom: 6px;
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       font-size: clamp(0.95rem, 3.5vw, 1.1rem);
     }
 
     .agenda-label {
       font-weight: bold;
       min-width: 90px;
-      color: var(--text-primary);
+      color: white;
     }
 
     .agenda-value {
-      color: var(--text-primary);
+      color: var(--muted);
       opacity: 0.95;
       flex: 1;
     }
 
     .turno-badge {
       display: inline-block;
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       padding: 4px 12px;
       border-radius: 30px;
       font-size: 0.95rem;
       font-weight: bold;
       letter-spacing: 0.5px;
-    }
-
-    .turno-manha { background: #dbeafe; color: #1d4ed8; }
-    .turno-tarde { background: #ffedd5; color: #c2410c; }
-    .turno-noite { background: #ede9fe; color: #7c3aed; }
-    .turno-outro { background: #e2e8f0; color: #475569; }
-
-    @media (prefers-color-scheme: dark) {
-      .turno-manha { background: #1e3a8a; color: #bfdbfe; }
-      .turno-tarde { background: #7c2d12; color: #fed7aa; }
-      .turno-noite { background: #5b21b6; color: #e9d5ff; }
-      .turno-outro { background: #334155; color: #cbd5e1; }
+      background: var(--accent-glow);
+      color: white;
     }
 
     .loading, .no-data {
       text-align: center;
       padding: 60px 30px;
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
+      background: var(--card);
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
       max-width: 700px;
       width: 100%;
       margin-top: 20px;
-      font-family: var(--jersey-font);
+      font-family: 'Jersey 15', system-ui, sans-serif;
       font-size: clamp(1.3rem, 5vw, 1.7rem);
-      color: var(--text-secondary);
+      color: var(--muted);
     }
 
     .loading i {
       display: block;
       font-size: 2.5rem;
       margin-bottom: 20px;
-      color: var(--text-secondary);
+      color: var(--accent);
       animation: spin 1.4s linear infinite;
     }
 
@@ -417,7 +442,7 @@
 
         const { data: usuarios } = await supabase
           .from('dadoscetep')
-          .select('nome, email, picture')
+          .select('nome, email, picture, nick')
           .in('email', emails);
 
         const usuarioMap = {};
@@ -429,7 +454,7 @@
         agendamentos.forEach(a => {
           const email = a.user_email?.toLowerCase();
           if (!email) return;
-          if (!grouped[email]) grouped[email] = { usuario: usuarioMap[email] || { nome: null, email: a.user_email, picture: null }, agendamentos: [] };
+          if (!grouped[email]) grouped[email] = { usuario: usuarioMap[email] || { nome: null, email: a.user_email, picture: null, nick: null }, agendamentos: [] };
           grouped[email].agendamentos.push(a);
         });
 
@@ -470,7 +495,7 @@
             `;
           });
 
-          const nomeExibido = usuario.nome || usuario.email || 'USUÁRIO';
+          const nomeExibido = usuario.nick || usuario.nome || usuario.email || 'USUÁRIO';
           const imageUrl = usuario.picture || 'https://via.placeholder.com/90/42a5f5/ffffff?text=U';
 
           card.innerHTML = `

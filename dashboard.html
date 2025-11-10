@@ -5,23 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Minha Agenda — Dashboard</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com  ">
-  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg-a: #0b1225;
-      --bg-b: #060f2b;
-      --card: rgba(15, 23, 42, 0.6);
-      --glass: rgba(255, 255, 255, 0.05);
-      --muted: rgba(230, 238, 248, 0.75);
-      --accent: #a7ff83;
-      --accent-2: #66d9ff;
-      --accent-glow: rgba(167, 255, 131, 0.3);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --bg-a: #0f172a;
+      --bg-b: #1e293b;
+      --card: rgba(15, 23, 42, 0.85);
+      --glass: rgba(255, 255, 255, 0.08);
+      --muted: rgba(230, 238, 248, 0.8);
+      --accent: #60a5fa;
+      --accent-2: #3b82f6;
+      --accent-glow: rgba(96, 165, 250, 0.4);
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
       --radius: 16px;
       --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --pixel-size: 4px;
       font-size: 16px;
     }
 
@@ -37,86 +38,99 @@
 
     body {
       font-family: 'Jersey 15', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(circle at 10% 20%, rgba(102, 217, 255, 0.04), transparent 40%),
-                  radial-gradient(circle at 90% 80%, rgba(167, 255, 131, 0.03), transparent 50%),
-                  linear-gradient(145deg, var(--bg-a), var(--bg-b));
+      background-color: var(--bg-a);
       color: #e6eef8;
       min-height: 100vh;
       padding: 24px;
       display: flex;
+      flex-direction: column;
       align-items: flex-start;
-      justify-content: center;
+      justify-content: flex-start;
       overflow-x: hidden;
       position: relative;
+      image-rendering: pixelated;
     }
 
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: 
-        radial-gradient(2px 2px at 20px 30px, #a7ff83, transparent),
-        radial-gradient(2px 2px at 40px 70px, rgba(167, 255, 131, 0.8), transparent),
-        radial-gradient(1px 1px at 90px 40px, #66d9ff, transparent),
-        radial-gradient(1px 1px at 130px 80px, rgba(102, 217, 255, 0.6), transparent),
-        radial-gradient(2px 2px at 160px 30px, #a7ff83, transparent);
-      background-repeat: repeat;
-      background-size: 200px 100px;
-      animation: sparkle 20s linear infinite;
-      opacity: 0.1;
-      z-index: -1;
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(96, 165, 250, 0.05) 2px, rgba(96, 165, 250, 0.05) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59, 130, 246, 0.05) 2px, rgba(59, 130, 246, 0.05) 4px),
+        linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 100%);
+      z-index: -2;
+      animation: grid-pulse 8s ease-in-out infinite;
     }
 
-    @keyframes sparkle {
-      0% { transform: translateY(0px) rotate(0deg); }
-      100% { transform: translateY(-100px) rotate(360deg); }
+    @keyframes grid-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.02); }
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(96, 165, 250, 0.15) 0%, transparent 70%);
+      mix-blend-mode: overlay;
+      z-index: -1;
+      animation: nebula-flow 20s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes nebula-flow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+
+    .pixel-particle {
+      position: absolute;
+      width: var(--pixel-size);
+      height: var(--pixel-size);
+      background: var(--accent);
+      opacity: 0.6;
+      animation: float-particles linear infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes float-particles {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
     }
 
     .wrap {
-      width: min(1120px, 96%);
+      width: min(1400px, 98%);
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 400px 1fr;
       gap: 28px;
       align-items: start;
-      animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+      flex: 1;
     }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* FOOTER SECTION */
+    .footer {
+      width: min(1400px, 98%);
+      margin-top: auto;
+      padding: 24px 0 0;
+      text-align: center;
+      border-top: 1px solid var(--accent-glow);
+      box-shadow: 0 -4px 12px var(--accent-glow);
     }
 
     /* PROFILE CARD */
     .profile-card {
       background: var(--card);
-      backdrop-filter: blur(12px);
       border-radius: var(--radius);
       padding: 24px;
-      box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      box-shadow: var(--shadow), inset 0 0 20px var(--accent-glow);
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      animation: slideInLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
-    }
-
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      border: var(--pixel-size) solid rgba(255, 255, 255, 0.04);
+      image-rendering: pixelated;
     }
 
     .profile-card::before {
@@ -126,7 +140,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, transparent 60%, rgba(167, 255, 131, 0.05) 100%);
+      background: radial-gradient(circle, transparent 50%, rgba(96, 165, 250, 0.08) 100%);
       z-index: -1;
       animation: morph 15s ease-in-out infinite alternate;
     }
@@ -140,6 +154,14 @@
       display: flex;
       gap: 20px;
       align-items: center;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
     }
 
     .profile-info {
@@ -164,7 +186,7 @@
       bottom: -4px;
       left: 0;
       width: 0;
-      height: 2px;
+      height: var(--pixel-size);
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
       transition: width 0.6s ease-out;
     }
@@ -178,12 +200,6 @@
       color: var(--muted);
       font-size: 0.95rem;
       letter-spacing: 0.3px;
-      opacity: 0;
-      animation: fadeIn 1s ease-out 0.5s forwards;
-    }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
     }
 
     .profile-actions {
@@ -191,16 +207,6 @@
       display: flex;
       gap: 14px;
       flex-wrap: wrap;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s forwards;
-    }
-
-    @keyframes slideUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     .btn {
@@ -213,7 +219,7 @@
       font-family: inherit;
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
       color: #06202b;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(167, 255, 131, 0.3);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 0 2px var(--accent-glow);
       transition: var(--transition);
       display: inline-flex;
       align-items: center;
@@ -221,6 +227,7 @@
       position: relative;
       overflow: hidden;
       letter-spacing: 0.5px;
+      image-rendering: pixelated;
     }
 
     .btn::before {
@@ -240,7 +247,7 @@
 
     .btn:hover {
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(167, 255, 131, 0.4), 0 0 20px rgba(167, 255, 131, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--accent-glow), 0 0 25px var(--accent-glow);
     }
 
     .btn:active {
@@ -250,62 +257,78 @@
 
     .btn.ghost {
       background: transparent;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: var(--pixel-size) solid rgba(255,255,255,0.08);
       color: var(--muted);
       box-shadow: none;
+      position: relative;
     }
 
     .btn.ghost:hover {
-      background: rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.05);
       border-color: var(--accent);
       color: white;
-      box-shadow: 0 0 20px rgba(167, 255, 131, 0.1);
+      box-shadow: 0 0 25px var(--accent-glow);
       transform: translateY(-2px) scale(1.02);
+    }
+
+    /* BADGE */
+    #updateLogBtn {
+      position: relative;
+    }
+
+    .update-badge {
+      display: none;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ef4444;
+      color: white;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      animation: pulse-badge 2s ease-in-out infinite;
+      z-index: 1;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.85; }
     }
 
     /* MAIN CARD */
     .main-card {
       background: var(--card);
-      backdrop-filter: blur(12px);
       border-radius: var(--radius);
       padding: 24px;
-      box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.03);
+      box-shadow: var(--shadow), inset 0 0 15px rgba(0,0,0,0.2);
       border: 1px solid rgba(255,255,255,0.04);
-      animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
-    }
-
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
     }
 
     .toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 16px;
       margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeIn 0.6s ease-out 1s forwards;
     }
 
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 22px;
     }
 
     .action-card {
-      background: rgba(255,255,255,0.015);
+      background: rgba(255,255,255,0.02);
       border-radius: 14px;
       padding: 20px;
-      border: 1px solid rgba(255,255,255,0.04);
+      border: var(--pixel-size) solid rgba(255,255,255,0.04);
       display: flex;
       flex-direction: column;
       gap: 14px;
@@ -313,20 +336,7 @@
       transition: var(--transition);
       position: relative;
       overflow: hidden;
-      opacity: 0;
-      transform: translateY(30px);
-      animation: staggeredIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    }
-
-    .action-card:nth-child(1) { animation-delay: 1.2s; }
-    .action-card:nth-child(2) { animation-delay: 1.4s; }
-    .action-card:nth-child(3) { animation-delay: 1.6s; }
-
-    @keyframes staggeredIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      image-rendering: pixelated;
     }
 
     .action-card::before {
@@ -335,7 +345,7 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 1px;
+      height: var(--pixel-size);
       background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -347,8 +357,8 @@
 
     .action-card:hover {
       transform: translateY(-8px) scale(1.02);
-      border-color: rgba(167, 255, 131, 0.3);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(167, 255, 131, 0.15);
+      border-color: rgba(96, 165, 250, 0.4);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 35px rgba(96, 165, 250, 0.2);
     }
 
     .action-card .title {
@@ -357,6 +367,15 @@
       letter-spacing: 0.4px;
       position: relative;
       z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-card .title::before {
+      content: '★';
+      font-size: 1.2rem;
+      opacity: 0.8;
     }
 
     .action-card .desc {
@@ -380,7 +399,7 @@
       border-radius: 12px;
       flex: 0 0 100px;
       overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.06);
+      border: var(--pixel-size) solid rgba(255,255,255,0.06);
       background: rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
@@ -418,10 +437,11 @@
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
       transition: filter 0.3s ease;
       padding: 8px;
+      image-rendering: pixelated;
     }
 
     .action-card:hover .animated-cta img {
-      filter: drop-shadow(0 0 15px var(--accent-glow)) brightness(1.1);
+      filter: drop-shadow(0 0 15px var(--accent-glow)) brightness(1.15);
     }
 
     .btn.big-btn {
@@ -439,7 +459,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.45);
       z-index: 1000;
       display: none;
     }
@@ -454,10 +474,19 @@
       max-height: 80vh;
       overflow-y: auto;
       border: 1px solid rgba(255, 255, 255, 0.04);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow), 0 0 20px var(--accent-glow);
       display: flex;
       flex-direction: column;
       gap: 20px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #updateLogContainer.wide {
+      max-width: 900px;
+      width: 90vw;
+      padding: 24px 32px;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
@@ -484,7 +513,6 @@
 
     .speech-bubble {
       background: var(--glass);
-      backdrop-filter: blur(12px);
       border-radius: 12px;
       padding: 16px;
       color: #e6eef8;
@@ -548,12 +576,12 @@
       border-radius: inherit;
       animation: pulse 1.5s infinite;
       z-index: -1;
-      box-shadow: 0 0 20px var(--accent-glow);
+      box-shadow: 0 0 25px var(--accent-glow);
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.08); }
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
     }
 
     .tutorial-pointer {
@@ -566,6 +594,324 @@
       border-bottom: 12px solid var(--accent);
       display: none;
       pointer-events: none;
+      animation: pointer-bounce 1s infinite;
+    }
+
+    @keyframes pointer-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* UPDATE LOG STYLES */
+    #logMessage {
+      width: 100%;
+      min-height: 100px;
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      color: #e6eef8;
+      font-family: inherit;
+      resize: vertical;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+
+    #logMessage::placeholder {
+      color: var(--muted);
+    }
+
+    .log-entry {
+      background: var(--glass);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transform-origin: center;
+    }
+
+    .log-entry:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--accent-glow);
+      border-color: var(--accent-glow);
+    }
+
+    .log-icon {
+      font-size: 2rem;
+      opacity: 0.7;
+      flex-shrink: 0;
+      margin-top: 2px;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .log-content {
+      flex: 1;
+    }
+
+    .log-entry .log-title {
+      margin: 0 0 8px 0;
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 1.1rem;
+      line-height: 1.3;
+      white-space: pre-wrap;
+    }
+
+    .log-entry p {
+      margin: 0 0 8px 0;
+      color: white;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .log-entry small {
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: block;
+    }
+
+    #logList {
+      max-height: 500px;
+      overflow-y: auto;
+      display: none;
+      padding-right: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-glow) transparent;
+    }
+
+    #logList::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #logList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #logList::-webkit-scrollbar-thumb {
+      background: var(--accent-glow);
+      border-radius: 3px;
+    }
+
+    .admin-only {
+      background: rgba(96, 165, 250, 0.12);
+      border: 1px solid var(--accent-glow);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    #logTitle {
+      width: 100%;
+      min-height: 40px;
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      color: #e6eef8;
+      font-family: inherit;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+
+    #logTitle::placeholder {
+      color: var(--muted);
+    }
+
+    /* ESTADO VAZIO */
+    .empty-log-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-log-gif-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+      animation: shake 0.5s infinite alternate;
+    }
+
+    @keyframes shake {
+      0% { transform: rotate(-2deg); }
+      100% { transform: rotate(2deg); }
+    }
+
+    .empty-log-gif-wrap img {
+      width: 200px;
+      height: auto;
+      display: block;
+    }
+
+    .animated-question {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--accent);
+      background: var(--glass);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: bounce 2s ease-in-out infinite;
+      white-space: nowrap;
+      font-size: 1.1rem;
+      font-weight: 500;
+      max-width: 200px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .animated-question::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid var(--glass);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    /* DEVELOPER BUTTON AND MODAL */
+    .dev-btn {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899, #ef4444);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 20px;
+      animation: gradient-shift 5s linear infinite;
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .dev-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .dev-btn:hover::before {
+      left: 100%;
+    }
+
+    .dev-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    }
+
+    .dev-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .dev-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+    }
+
+    .dev-container {
+      position: fixed;
+      z-index: 1001;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      max-height: 70vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow), 0 0 20px var(--accent-glow);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .dev-title {
+      color: white;
+      margin-bottom: 24px;
+      font-size: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    .dev-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .dev-list li {
+      background: var(--glass);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+    }
+
+    .dev-list li:hover {
+      background: rgba(139, 92, 246, 0.12);
+      border-color: #8b5cf6;
+      color: white;
+      transform: scale(1.03);
+    }
+
+    .close-dev {
+      margin-top: 20px;
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .close-dev:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: #8b5cf6;
+      color: #8b5cf6;
     }
 
     /* RESPONSIVE */
@@ -608,11 +954,47 @@
         grid-template-columns: 1fr;
       }
 
-      .tutorial-container {
+      .tutorial-container,
+      #updateLogContainer.wide {
         max-width: calc(100% - 32px);
         left: 16px !important;
         top: 16px !important;
         transform: none !important;
+        max-height: 90vh;
+        width: calc(100% - 32px) !important;
+      }
+
+      .log-entry {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .log-icon {
+        align-self: flex-start;
+      }
+
+      .empty-log-gif-wrap img {
+        width: 150px;
+      }
+
+      .animated-question {
+        top: -40px;
+        font-size: 1rem;
+        padding: 10px 14px;
+        max-width: 180px;
+      }
+
+      .animated-question::after {
+        border-left-width: 8px;
+        border-right-width: 8px;
+        border-top-width: 8px;
+        bottom: -6px;
+      }
+
+      .dev-container {
+        width: 95%;
+        padding: 24px;
       }
     }
 
@@ -622,23 +1004,133 @@
       .profile-name { font-size: 1.15rem; }
       .btn { padding: 12px; font-size: 0.95rem; }
       #guide-gif { width: 100px; height: 100px; }
+      .log-entry { padding: 16px; }
+      .log-icon { font-size: 1.5rem; }
+
+      .empty-log-gif-wrap img {
+        width: 120px;
+      }
+
+      .animated-question {
+        top: -35px;
+        font-size: 0.95rem;
+        padding: 8px 12px;
+        max-width: 160px;
+      }
+
+      .animated-question::after {
+        border-left-width: 7px;
+        border-right-width: 7px;
+        border-top-width: 7px;
+        bottom: -5px;
+      }
+
+      .dev-btn {
+        padding: 8px 16px;
+        font-size: 0.95rem;
+      }
+
+      .dev-container {
+        padding: 20px;
+      }
+
+      .dev-title {
+        font-size: 1.3rem;
+      }
     }
 
-    /* FOCUS STYLES FOR ACCESSIBILITY */
     .btn:focus-visible,
     .action-card[tabindex]:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
+      box-shadow: 0 0 15px var(--accent-glow);
     }
+
+    /* Modal de Edição */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 25, 47, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      padding: 20px;
+      transition: background 0.3s ease;
+      display: none;
+    }
+
+    .modal-card {
+      width: 600px;
+      max-width: 95%;
+      background: var(--card);
+      border: 1px solid var(--glass);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .modal-card h3 {
+      margin: 0 0 16px;
+      font-weight: 700;
+    }
+
+    .modal-card input,
+    .modal-card select {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text);
+      font-family: inherit;
+      transition: border 0.3s ease, background 0.3s ease;
+    }
+
+    .modal-card input::placeholder {
+      color: var(--muted);
+    }
+
+    /* NOVO: Estilos para seleção de GIFs no modal de edição */
+    .avatar-selector {
+      margin-top: 16px;
+    }
+
+    .gif-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .gif-option {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border 0.3s ease, transform 0.3s ease;
+    }
+
+    .gif-option:hover,
+    .gif-option.selected {
+      border-color: var(--accent);
+      transform: scale(1.1);
+    }
+
   </style>
 
-  <script src="  https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2  "></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
+
   <div class="wrap">
     <aside class="profile-card" aria-label="Informações do usuário">
       <div class="avatar-wrap">
+        <img id="userAvatar" class="avatar" src="https://via.placeholder.com/100/0f172a/60a5fa?text=👤" alt="Avatar do usuário" />
         <div class="profile-info">
           <div class="profile-name" id="userNick">Carregando...</div>
           <div class="profile-role" id="userRole">—</div>
@@ -652,11 +1144,15 @@
 
     <main class="main-card">
       <div class="toolbar">
-        <button class="btn ghost" id="refreshBtn" style="margin-left:auto;">Atualizar</button>
+        <button class="btn ghost" id="updateLogBtn">
+          Update Log
+          <span id="updateBadge" class="update-badge">!</span>
+        </button>
+        <button class="btn ghost" id="refreshBtn">↻ Atualizar</button>
       </div>
 
       <div class="cards-grid">
-        <section class="action-card" aria-labelledby="agendarTitle">
+        <section class="action-card" aria-labelledby="agendarTitle" tabindex="0">
           <div class="animated-cta">
             <div class="thumb"><img src="imagen/agendar.png" alt="Agendar ícone"></div>
             <div class="meta">
@@ -678,7 +1174,7 @@
           <button class="btn ghost big-btn" id="openGlobal">Abrir Agenda Global</button>
         </section>
 
-        <section class="action-card" aria-labelledby="minhaTitle">
+        <section class="action-card" aria-labelledby="minhaTitle" tabindex="0">
           <div class="animated-cta">
             <div class="thumb"><img src="imagen/minhas-agenda.png" alt="Minha agenda"></div>
             <div class="meta">
@@ -690,6 +1186,10 @@
         </section>
       </div>
     </main>
+  </div>
+
+  <div class="footer">
+    <button class="dev-btn" id="devBtn">Desenvolvedores</button>
   </div>
 
   <!-- Tutorial Pointer -->
@@ -712,46 +1212,96 @@
     </div>
   </div>
 
+  <!-- Developer Modal -->
+  <div class="dev-modal" id="devModal">
+    <div class="dev-container">
+      <h2 class="dev-title">👨‍💻 Desenvolvedores</h2>
+      <ul class="dev-list">
+        <li>Matheus Soares</li>
+        <li>Matheus Neves</li>
+        <li>Uesley Luz</li>
+        <li>Carlos André Soares</li>
+      </ul>
+      <button class="close-dev" id="closeDev">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Update Log Overlay -->
+  <div class="tutorial-overlay" id="updateLogOverlay">
+    <div class="tutorial-container" id="updateLogContainer">
+      <h3 style="color: white; margin: 0 0 16px 0; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;">✎ Update Log</h3>
+      <div id="logForm" style="display: none;">
+        <div class="admin-only">
+          <p style="color: var(--accent); margin: 0 0 8px 0; font-size: 0.9rem;">⚙ Você é administrador. Digite a nova atualização abaixo:</p>
+          <input type="text" id="logTitle" placeholder="Título da atualização (opcional)">
+          <textarea id="logMessage" placeholder="Digite a nova atualização aqui..."></textarea>
+          <button class="btn" id="saveLog">Salvar Atualização</button>
+        </div>
+      </div>
+      <div id="logList"></div>
+      <div class="tutorial-controls">
+        <button class="btn ghost" id="closeLog">× Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de edição do perfil -->
+  <div id="editModal" class="modal">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3>Editar Perfil</h3>
+        <button class="btn" id="closeEditModal"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      </div>
+      <div style="display:flex;gap:12px;flex-direction:column">
+        <label class="small">Apelido (Nick)</label>
+        <input id="editNick" type="text" placeholder="Seu apelido" />
+        <label class="small">URL da imagem (ou selecione abaixo)</label>
+        <input id="editPic" type="text" placeholder="https://..." />
+        <div class="avatar-selector">
+          <h4>Escolha um GIF para o perfil:</h4>
+          <div class="gif-grid">
+            <img class="gif-option" src="avatars/1.gif" alt="GIF 1" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/2.gif" alt="GIF 2" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/3.gif" alt="GIF 3" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/4.gif" alt="GIF 4" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/5.gif" alt="GIF 5" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/6.gif" alt="GIF 6" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/7.gif" alt="GIF 7" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/8.gif" alt="GIF 8" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/9.gif" alt="GIF 9" onclick="selectGif(this)">
+            <img class="gif-option" src="avatars/10.gif" alt="GIF 10" onclick="selectGif(this)">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+          <button class="btn primary" id="saveProfile">Salvar</button>
+          <button class="btn ghost" id="cancelEdit">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co  ';
+    const supabaseUrl = 'https://zszcwubydhgoyhxbxfro.supabase.co';
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzemN3dWJ5ZGhnb3loeGJ4ZnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MDk5MDMsImV4cCI6MjA3NTM4NTkwM30.ryioOoPAZnZzGdcTxIjfUcSlYUUqa7arA4qlUukyV7M';
-    const supabase = window.supabase.createClient(supabaseUrl.trim(), supabaseAnonKey.trim());
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     let userName = 'Usuário';
+    let isAdmin = false;
+    let email = null;
 
-    // Tutorial Logic
     const baseTutorialSteps = [
-      {
-        target: null,
-        message: 'Olá {{userName}}, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.'
-      },
-      {
-        target: '#editProfile',
-        message: 'Aqui você pode editar seu perfil para personalizar suas informações, como nome e apelido.'
-      },
-      {
-        target: '[onclick="location.href=\'agendar.html\'"]',
-        message: 'Clique em "Ir para Agendamento" para agendar laboratórios e salas rapidamente com sugestões inteligentes.'
-      },
-      {
-        target: '#openGlobal',
-        message: '"Abrir Agenda Global" mostra todos os agendamentos de todos os usuários em tempo real.'
-      },
-      {
-        target: '[onclick="location.href=\'minha-agenda.html\'"]',
-        message: '"Ver Minha Agenda" exibe apenas seus agendamentos pessoais com ações rápidas para gerenciar.'
-      },
-      {
-        target: null,
-        message: 'Foi um prazer te guiar nessa jornada inicial, {{userName}}! Eu sou Ayda e nos encontraremos mais vezes aqui na plataforma sempre que precisar de ajuda adicional.'
-      }
+      { target: null, message: 'Olá {{userName}}, eu me chamo Ayda, serei sua guia para aprender a utilizar a plataforma.' },
+      { target: '#editProfile', message: 'Aqui você pode editar seu perfil para personalizar suas informações, como nome e apelido.' },
+      { target: '[onclick="location.href=\'agendar.html\'"]', message: 'Clique em "Ir para Agendamento" para agendar laboratórios e salas rapidamente com sugestões inteligentes.' },
+      { target: '#openGlobal', message: '"Abrir Agenda Global" mostra todos os agendamentos de todos os usuários em tempo real.' },
+      { target: '[onclick="location.href=\'minha-agenda.html\'"]', message: '"Ver Minha Agenda" exibe apenas seus agendamentos pessoais com ações rápidas para gerenciar.' },
+      { target: null, message: 'Foi um prazer te guiar nessa jornada inicial, {{userName}}! Eu sou Ayda e nos encontraremos mais vezes aqui na plataforma sempre que precisar de ajuda adicional.' }
     ];
 
     let tutorialSteps = [...baseTutorialSteps];
     let currentStep = 0;
 
     function startTutorial() {
-      // Personalize messages
       tutorialSteps = baseTutorialSteps.map(step => ({
         ...step,
         message: step.message.replace('{{userName}}', userName)
@@ -772,40 +1322,31 @@
       messageEl.textContent = step.message;
       indicatorEl.textContent = `Passo ${currentStep + 1} de ${tutorialSteps.length}`;
 
-      // Remove previous highlight
-      document.querySelectorAll('.highlight-target').forEach(el => {
-        el.classList.remove('highlight-target');
-      });
+      document.querySelectorAll('.highlight-target').forEach(el => el.classList.remove('highlight-target'));
 
       const targetEl = document.querySelector(step.target);
       if (targetEl) {
         targetEl.classList.add('highlight-target');
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-        // Position pointer
         const rect = targetEl.getBoundingClientRect();
         pointer.style.left = (rect.left + rect.width / 2) + 'px';
         pointer.style.top = (rect.top - 12) + 'px';
         pointer.style.display = 'block';
         pointer.style.transform = 'translateX(-50%)';
 
-        // Position container to the right or left of target
         let left = rect.right + 20;
         let top = rect.top;
         const containerWidth = 500;
         const vw = window.innerWidth;
-
-        if (left + containerWidth > vw) {
-          left = Math.max(20, rect.left - containerWidth - 20);
-        }
+        if (left + containerWidth > vw) left = Math.max(20, rect.left - containerWidth - 20);
         if (top < 20) top = 20;
-        if (top + 300 > window.innerHeight) top = window.innerHeight - 320; // adjust height approx
+        if (top + 300 > window.innerHeight) top = window.innerHeight - 320;
 
         container.style.left = left + 'px';
         container.style.top = top + 'px';
         container.style.transform = 'none';
       } else {
-        // Center for intro and farewell
         pointer.style.display = 'none';
         container.style.left = '50%';
         container.style.top = '50%';
@@ -817,11 +1358,8 @@
     }
 
     function nextStep() {
-      if (currentStep < tutorialSteps.length - 1) {
-        currentStep++;
-      } else {
-        endTutorial();
-      }
+      if (currentStep < tutorialSteps.length - 1) currentStep++;
+      else endTutorial();
       updateStep();
     }
 
@@ -835,22 +1373,112 @@
     function endTutorial() {
       document.getElementById('tutorialOverlay').style.display = 'none';
       document.getElementById('tutorial-pointer').style.display = 'none';
-      // Remove all highlights
-      document.querySelectorAll('.highlight-target').forEach(el => {
-        el.classList.remove('highlight-target');
-      });
+      document.querySelectorAll('.highlight-target').forEach(el => el.classList.remove('highlight-target'));
+      localStorage.setItem('tutorialSeen', 'true');
     }
 
     function initTutorial() {
-      // Always start tutorial
       setTimeout(startTutorial, 500);
     }
 
-    // Event listeners for tutorial
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('nextStep').addEventListener('click', nextStep);
-      document.getElementById('prevStep').addEventListener('click', prevStep);
-    });
+    async function fetchLogs() {
+      try {
+        const { data: logs, error } = await supabase
+          .from('update_logs')
+          .select('id, titulo, notasdaatualizacao, created_at')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const listEl = document.getElementById('logList');
+        if (logs && logs.length > 0) {
+          listEl.innerHTML = logs.map(log => {
+            const formattedText = log.notasdaatualizacao.replace(/\n/g, '<br>');
+            const logDate = new Date(log.created_at);
+            const dateStr = !isNaN(logDate.getTime()) ? logDate.toLocaleDateString('pt-BR') : 'Data inválida';
+            const titleHtml = log.titulo ? `<div class="log-title">${log.titulo.replace(/\n/g, '<br>')}</div>` : '';
+            const icon = log.titulo?.toLowerCase().includes('bug') ? '⚠' : 
+                         log.titulo?.toLowerCase().includes('nova') ? '➕' : '✎';
+            return `
+              <div class="log-entry">
+                <span class="log-icon">${icon}</span>
+                <div class="log-content">
+                  ${titleHtml}
+                  <p>${formattedText}</p>
+                  <small>${dateStr}</small>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          const lastViewed = localStorage.getItem('lastUpdateLogView');
+          const newestLogTime = logs[0].created_at;
+          const badge = document.getElementById('updateBadge');
+          
+          if (newestLogTime && (!lastViewed || new Date(newestLogTime) > new Date(lastViewed))) {
+            badge.style.display = 'flex';
+          } else {
+            badge.style.display = 'none';
+          }
+        } else {
+          listEl.innerHTML = `
+            <div class="empty-log-state">
+              <div class="empty-log-gif-wrap">
+                <img src="imagen/largata.gif" alt="Lagarta com dúvida">
+                <div class="animated-question">Nada por aqui!</div>
+              </div>
+            </div>
+          `;
+          document.getElementById('updateBadge').style.display = 'none';
+        }
+        listEl.style.display = 'block';
+      } catch (err) {
+        console.error('Erro ao carregar logs:', err);
+        document.getElementById('logList').innerHTML = `<p style="color: red;">Erro ao carregar: ${err.message || 'veja o console'}</p>`;
+        document.getElementById('logList').style.display = 'block';
+      }
+    }
+
+    async function saveLog() {
+      const title = document.getElementById('logTitle').value.trim();
+      const message = document.getElementById('logMessage').value.trim();
+      if (!message) {
+        alert('Por favor, digite uma mensagem.');
+        return;
+      }
+
+      try {
+        const { error } = await supabase
+          .from('update_logs')
+          .insert({
+            titulo: title || null,
+            notasdaatualizacao: message
+          });
+
+        if (error) throw error;
+
+        document.getElementById('logTitle').value = '';
+        document.getElementById('logMessage').value = '';
+        fetchLogs();
+        alert('Atualização salva com sucesso!');
+      } catch (err) {
+        console.error('Erro ao salvar log:', err);
+        alert(`Falha ao salvar: ${err.message || 'verifique o console (F12)'}`);
+      }
+    }
+
+    function showUpdateLog() {
+      const overlay = document.getElementById('updateLogOverlay');
+      const container = document.getElementById('updateLogContainer');
+      
+      localStorage.setItem('lastUpdateLogView', new Date().toISOString());
+      container.classList.add('wide');
+      
+      const logForm = document.getElementById('logForm');
+      logForm.style.display = isAdmin ? 'block' : 'none';
+      overlay.style.display = 'block';
+      fetchLogs();
+    }
 
     function parseJwt(token) {
       try {
@@ -865,8 +1493,31 @@
       }
     }
 
+    // NOVO: Função para selecionar GIF
+    function selectGif(el) {
+      document.querySelectorAll('.gif-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('editPic').value = el.src;
+    }
+
+    async function saveProfile() {
+      const nick = document.getElementById('editNick').value.trim();
+      const pic = document.getElementById('editPic').value.trim();
+      if (nick) document.getElementById('userNick').textContent = nick;
+      if (pic) document.getElementById('userAvatar').src = pic;
+      document.getElementById('editModal').style.display = 'none';
+      if (email) {
+        try {
+          const { error } = await supabase.from('dadoscetep').update({ nick, picture: pic }).eq('email', email);
+          if (error) console.warn('Erro ao salvar:', error);
+        } catch (err) {
+          console.warn('Erro ao salvar no Supabase:', err);
+        }
+      }
+    }
+
     async function init() {
-      let email = localStorage.getItem('userEmail');
+      email = localStorage.getItem('userEmail');
       if (!email) {
         const token = localStorage.getItem('googleToken');
         const payload = parseJwt(token);
@@ -877,30 +1528,39 @@
         document.getElementById('userNick').textContent = 'Convidado';
         document.getElementById('userRole').textContent = 'Faça login para acessar';
         userName = 'Convidado';
-        initTutorial();
+        if (localStorage.getItem('tutorialSeen') !== 'true') {
+          initTutorial();
+        }
         return;
       }
 
       try {
         const { data, error } = await supabase
           .from('dadoscetep')
-          .select('nome, classe, email, nick')
+          .select('nome, classe, email, nick, picture')
           .eq('email', email)
           .single();
 
         if (error) throw error;
 
-        const displayName = data.nome || data.nick || 'Usuário';
+        const displayName = data.nick || data.nome || 'Usuário';
         document.getElementById('userNick').textContent = displayName;
         document.getElementById('userRole').textContent = data.classe || '—';
-        localStorage.setItem('userData', JSON.stringify(data));
+        let avatarSrc = data.picture;
+        if (!avatarSrc) {
+          const randomGif = Math.floor(Math.random() * 10) + 1;
+          avatarSrc = `avatars/${randomGif}.gif`;
+          await supabase.from('dadoscetep').update({ picture: avatarSrc }).eq('email', email);
+        }
+        document.getElementById('userAvatar').src = avatarSrc || 'https://via.placeholder.com/100/0f172a/60a5fa?text=👤';
         userName = displayName;
+        isAdmin = ['tridgal2007@gmail.com', 'lokiatgardiano@gmail.com'].includes(email);
       } catch (err) {
-        console.error('Falha ao carregar dados:', err);
+        console.error('Falha ao carregar dados do usuário:', err);
         document.getElementById('userRole').textContent = 'Erro ao carregar';
+        isAdmin = false;
       }
 
-      // Frame animation
       const frameImages = ['frame3.png','frame1.png','frame6.png','frame2.png','frame4.png','frame5.png'];
       let currentFrame = 0;
       const img = document.getElementById('agendados-img');
@@ -911,17 +1571,65 @@
         }, 280);
       }
 
-      // Navigation
-      const nav = (url) => () => location.href = url;
-      document.getElementById('agendadosBtn').addEventListener('click', nav('agendados.html'));
-      document.getElementById('openGlobal').addEventListener('click', nav('agendados.html'));
+      document.getElementById('agendadosBtn').addEventListener('click', () => location.href = 'agendados.html');
+      document.getElementById('openGlobal').addEventListener('click', () => location.href = 'agendados.html');
       document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
+      document.getElementById('updateLogBtn').addEventListener('click', showUpdateLog);
+      document.getElementById('closeLog').addEventListener('click', () => {
+        document.getElementById('updateLogOverlay').style.display = 'none';
+      });
+      document.getElementById('saveLog').addEventListener('click', saveLog);
 
-      // Init tutorial after DOM and data load
-      initTutorial();
+      document.getElementById('devBtn').addEventListener('click', () => {
+        document.getElementById('devModal').style.display = 'block';
+      });
+      document.getElementById('closeDev').addEventListener('click', () => {
+        document.getElementById('devModal').style.display = 'none';
+      });
+      document.getElementById('devModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('devModal')) {
+          document.getElementById('devModal').style.display = 'none';
+        }
+      });
+
+      // Eventos para modal de edição
+      document.getElementById('editProfile').addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'flex';
+        document.getElementById('editNick').value = document.getElementById('userNick').textContent;
+        document.getElementById('editPic').value = document.getElementById('userAvatar').src;
+        document.querySelectorAll('.gif-option').forEach(opt => opt.classList.remove('selected'));
+        const currentGif = document.getElementById('userAvatar').src;
+        if (currentGif && currentGif.includes('.gif')) {
+          document.querySelector(`.gif-option[src="${currentGif}"]`)?.classList.add('selected');
+        }
+      });
+      document.getElementById('closeEditModal').addEventListener('click', () => document.getElementById('editModal').style.display = 'none');
+      document.getElementById('cancelEdit').addEventListener('click', () => document.getElementById('editModal').style.display = 'none');
+      document.getElementById('saveProfile').addEventListener('click', saveProfile);
+
+      fetchLogs();
+
+      if (localStorage.getItem('tutorialSeen') !== 'true') {
+        initTutorial();
+      }
+
+      // Add pixel particles
+      const particleCount = 50;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('pixel-particle');
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        document.body.appendChild(particle);
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nextStep').addEventListener('click', nextStep);
+      document.getElementById('prevStep').addEventListener('click', prevStep);
+      init();
+    });
   </script>
 </body>
 </html>
