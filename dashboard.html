@@ -111,16 +111,6 @@
       flex: 1;
     }
 
-    /* FOOTER SECTION */
-    .footer {
-      width: min(1400px, 98%);
-      margin-top: auto;
-      padding: 24px 0 0;
-      text-align: center;
-      border-top: 1px solid var(--accent-glow);
-      box-shadow: 0 -4px 12px var(--accent-glow);
-    }
-
     /* PROFILE CARD */
     .profile-card {
       background: var(--card);
@@ -789,131 +779,6 @@
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 
-    /* DEVELOPER BUTTON AND MODAL */
-    .dev-btn {
-      background: linear-gradient(135deg, #8b5cf6, #ec4899, #ef4444);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 50px;
-      color: white;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-      position: relative;
-      overflow: hidden;
-      margin-top: 20px;
-      animation: gradient-shift 5s linear infinite;
-    }
-
-    @keyframes gradient-shift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .dev-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .dev-btn:hover::before {
-      left: 100%;
-    }
-
-    .dev-btn:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    }
-
-    .dev-btn:active {
-      transform: translateY(0) scale(0.98);
-    }
-
-    .dev-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      display: none;
-    }
-
-    .dev-container {
-      position: fixed;
-      z-index: 1001;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 32px;
-      max-width: 400px;
-      width: 90%;
-      max-height: 70vh;
-      overflow-y: auto;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      box-shadow: var(--shadow), 0 0 20px var(--accent-glow);
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .dev-title {
-      color: white;
-      margin-bottom: 24px;
-      font-size: 1.5rem;
-      letter-spacing: 0.5px;
-    }
-
-    .dev-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      color: var(--muted);
-    }
-
-    .dev-list li {
-      background: var(--glass);
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: var(--transition);
-    }
-
-    .dev-list li:hover {
-      background: rgba(139, 92, 246, 0.12);
-      border-color: #8b5cf6;
-      color: white;
-      transform: scale(1.03);
-    }
-
-    .close-dev {
-      margin-top: 20px;
-      background: transparent;
-      border: 1px solid var(--muted);
-      color: var(--muted);
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .close-dev:hover {
-      background: rgba(139, 92, 246, 0.1);
-      border-color: #8b5cf6;
-      color: #8b5cf6;
-    }
-
     /* RESPONSIVE */
     @media (max-width: 880px) {
       body { padding: 16px; }
@@ -991,11 +856,6 @@
         border-top-width: 8px;
         bottom: -6px;
       }
-
-      .dev-container {
-        width: 95%;
-        padding: 24px;
-      }
     }
 
     @media (max-width: 420px) {
@@ -1023,19 +883,6 @@
         border-right-width: 7px;
         border-top-width: 7px;
         bottom: -5px;
-      }
-
-      .dev-btn {
-        padding: 8px 16px;
-        font-size: 0.95rem;
-      }
-
-      .dev-container {
-        padding: 20px;
-      }
-
-      .dev-title {
-        font-size: 1.3rem;
       }
     }
 
@@ -1188,10 +1035,6 @@
     </main>
   </div>
 
-  <div class="footer">
-    <button class="dev-btn" id="devBtn">Desenvolvedores</button>
-  </div>
-
   <!-- Tutorial Pointer -->
   <div id="tutorial-pointer" class="tutorial-pointer"></div>
 
@@ -1209,20 +1052,6 @@
         <button class="btn ghost" id="prevStep" style="display: none;">Anterior</button>
         <button class="btn" id="nextStep">Próximo</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Developer Modal -->
-  <div class="dev-modal" id="devModal">
-    <div class="dev-container">
-      <h2 class="dev-title">👨‍💻 Desenvolvedores</h2>
-      <ul class="dev-list">
-        <li>Matheus Soares</li>
-        <li>Matheus Neves</li>
-        <li>Uesley Luz</li>
-        <li>Carlos André Soares</li>
-      </ul>
-      <button class="close-dev" id="closeDev">Fechar</button>
     </div>
   </div>
 
@@ -1580,18 +1409,6 @@
       });
       document.getElementById('saveLog').addEventListener('click', saveLog);
 
-      document.getElementById('devBtn').addEventListener('click', () => {
-        document.getElementById('devModal').style.display = 'block';
-      });
-      document.getElementById('closeDev').addEventListener('click', () => {
-        document.getElementById('devModal').style.display = 'none';
-      });
-      document.getElementById('devModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('devModal')) {
-          document.getElementById('devModal').style.display = 'none';
-        }
-      });
-
       // Eventos para modal de edição
       document.getElementById('editProfile').addEventListener('click', () => {
         document.getElementById('editModal').style.display = 'flex';
@@ -1614,6 +1431,16 @@
       }
 
       // Add pixel particles
+      const particleContainer = document.createElement('div');
+      particleContainer.style.position = 'fixed';
+      particleContainer.style.top = '0';
+      particleContainer.style.left = '0';
+      particleContainer.style.width = '100%';
+      particleContainer.style.height = '100%';
+      particleContainer.style.pointerEvents = 'none';
+      particleContainer.style.zIndex = '-1';
+      document.body.appendChild(particleContainer);
+
       const particleCount = 50;
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
@@ -1621,7 +1448,7 @@
         particle.style.left = `${Math.random() * 100}%`;
         particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
         particle.style.animationDelay = `${Math.random() * 5}s`;
-        document.body.appendChild(particle);
+        particleContainer.appendChild(particle);
       }
     }
 

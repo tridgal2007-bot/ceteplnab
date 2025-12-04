@@ -819,16 +819,26 @@
       "2º horário (07:45 - 08:30)",
       "3º horário (08:30 - 09:15)",
       "4º horário (09:15 - 10:00)",
-      "5º horário (10:00 - 10:45)",
-      "6º horário (10:45 - 11:30)"
+      "Intervalo (10:00 - 10:20)",
+      "5º horário (10:20 - 11:05)",
+      "6º horário (11:05 - 11:50)"
     ];
     const HORARIOS_TARDE = [
       "1º horário (13:00 - 13:45)",
       "2º horário (13:45 - 14:30)",
       "3º horário (14:30 - 15:15)",
       "4º horário (15:15 - 16:00)",
-      "5º horário (16:00 - 16:45)",
-      "6º horário (16:45 - 17:30)"
+      "Intervalo (16:00 - 16:20)",
+      "5º horário (16:20 - 17:05)",
+      "6º horário (17:05 - 17:50)"
+    ];
+    const HORARIOS_NOITE = [
+      "1º horário (18:00 - 18:45)",
+      "2º horário (18:45 - 19:30)",
+      "3º horário (19:30 - 20:15)",
+      "4º horário (20:15 - 21:00)",
+      "5º horário (21:00 - 21:45)",
+      "6º horário (21:45 - 22:00)"
     ];
 
     const STORAGE_KEY = "agendamentos_v3";
@@ -1172,41 +1182,41 @@
 
     function populateHorariosFragment(turno, diaEscolhido, id){
       const frag = document.createDocumentFragment();
-      if(turno === "Manhã"){
-        let anyEnabled = false;
-        HORARIOS_MANHA.forEach((h, idx) => {
-          const checkboxId = `chk-m-${id}-${idx}-${Math.random().toString(36).slice(2,7)}`;
-          const label = document.createElement("label");
-          label.className = "item-label";
-          label.htmlFor = checkboxId;
-          label.innerHTML = `<input type="checkbox" id="${checkboxId}" value="${h}"> ${h}`;
-          const cb = label.querySelector("input[type=checkbox]");
-          if (horarioPassou(h, diaEscolhido)){ cb.disabled = true; label.classList.add("disabled"); cb.title = "Esse horário já passou hoje"; }
-          else { anyEnabled = true; cb.addEventListener("change", ()=> { label.classList.toggle("selected", cb.checked); const containerId = label.closest(".horarios").id.replace("horarios-",""); limitarSelecao(containerId); }); }
-          frag.appendChild(label);
-        });
-        if (!anyEnabled){ const p = document.createElement("div"); p.style.padding="8px 6px"; p.style.color="#ef4444"; p.style.fontWeight="600"; p.textContent="Todos os horários da manhã já passaram hoje."; frag.appendChild(p); }
-      } else if(turno === "Tarde"){
-        let anyEnabled = false;
-        HORARIOS_TARDE.forEach((h, idx) => {
-          const checkboxId = `chk-t-${id}-${idx}-${Math.random().toString(36).slice(2,7)}`;
-          const label = document.createElement("label");
-          label.className = "item-label";
-          label.htmlFor = checkboxId;
-          label.innerHTML = `<input type="checkbox" id="${checkboxId}" value="${h}"> ${h}`;
-          const cb = label.querySelector("input[type=checkbox]");
-          if (horarioPassou(h, diaEscolhido)){ cb.disabled = true; label.classList.add("disabled"); cb.title = "Esse horário já passou hoje"; }
-          else { anyEnabled = true; cb.addEventListener("change", ()=> { label.classList.toggle("selected", cb.checked); const containerId = label.closest(".horarios").id.replace("horarios-",""); limitarSelecao(containerId); }); }
-          frag.appendChild(label);
-        });
-        if (!anyEnabled){ const p = document.createElement("div"); p.style.padding="8px 6px"; p.style.color="#ef4444"; p.style.fontWeight="600"; p.textContent="Todos os horários da tarde já passaram hoje."; frag.appendChild(p); }
-      } else if(turno === "Noite"){
-        const p = document.createElement("div");
-        p.style.padding = "8px 6px";
-        p.style.color = "var(--muted)";
-        p.textContent = "Sem horários específicos definidos para este turno (opcional: personalizar).";
-        frag.appendChild(p);
+      let horarios = [];
+      let prefix = '';
+      if (turno === "Manhã") {
+        horarios = HORARIOS_MANHA;
+        prefix = 'm';
+      } else if (turno === "Tarde") {
+        horarios = HORARIOS_TARDE;
+        prefix = 't';
+      } else if (turno === "Noite") {
+        horarios = HORARIOS_NOITE;
+        prefix = 'n';
       }
+      let anyEnabled = false;
+      horarios.forEach((h, idx) => {
+        const checkboxId = `chk-${prefix}-${id}-${idx}-${Math.random().toString(36).slice(2,7)}`;
+        const label = document.createElement("label");
+        label.className = "item-label";
+        label.htmlFor = checkboxId;
+        label.innerHTML = `<input type="checkbox" id="${checkboxId}" value="${h}"> ${h}`;
+        const cb = label.querySelector("input[type=checkbox]");
+        if (h.includes("Intervalo")) {
+          cb.disabled = true;
+          label.classList.add("disabled");
+          cb.title = "Intervalo não agendável";
+        } else if (horarioPassou(h, diaEscolhido)) {
+          cb.disabled = true;
+          label.classList.add("disabled");
+          cb.title = "Esse horário já passou hoje";
+        } else {
+          anyEnabled = true;
+          cb.addEventListener("change", ()=> { label.classList.toggle("selected", cb.checked); const containerId = label.closest(".horarios").id.replace("horarios-",""); limitarSelecao(containerId); });
+        }
+        frag.appendChild(label);
+      });
+      if (!anyEnabled && horarios.length > 0){ const p = document.createElement("div"); p.style.padding="8px 6px"; p.style.color="#ef4444"; p.style.fontWeight="600"; p.textContent=`Todos os horários do turno ${turno.toLowerCase()} já passaram hoje.`; frag.appendChild(p); }
       return frag;
     }
 
@@ -1245,7 +1255,10 @@
         checkboxes.forEach(cb=>{
           const labelText = cb.value || "";
           const lab = cb.closest("label");
-          if (labelText && horarioPassou(labelText, getSelectedDayForCard(id))) {
+          if (labelText.includes("Intervalo")) {
+            cb.disabled = true;
+            if(lab) lab.classList.add("disabled");
+          } else if (labelText && horarioPassou(labelText, getSelectedDayForCard(id))) {
             cb.disabled = true;
             if(lab) lab.classList.add("disabled");
             if(lab) lab.classList.remove("selected");
@@ -1663,7 +1676,7 @@
         document.querySelectorAll('.horarios.open').forEach(hEl => {
           const id = hEl.id.replace('horarios-','');
           const sel = document.getElementById(`turno-${id}`);
-          if (sel && (sel.value === "Manhã" || sel.value === "Tarde")) {
+          if (sel && (sel.value === "Manhã" || sel.value === "Tarde" || sel.value === "Noite")) {
             const turno = sel.value;
             const selectedDay = getSelectedDayForCard(id);
             const frag = populateHorariosFragment(turno, selectedDay, id);
